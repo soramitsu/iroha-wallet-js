@@ -48,7 +48,7 @@
   .login-form-container {
     position: relative;
     max-width: 30rem;
-    margin: 5rem auto;
+    margin: 10rem auto;
     overflow: visible;
     padding-top: 3rem;
   }
