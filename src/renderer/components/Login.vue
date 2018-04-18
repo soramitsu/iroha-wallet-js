@@ -31,7 +31,7 @@
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary">Login</el-button>
+        <el-button type="primary" @click="onSubmit">Login</el-button>
       </el-form-item>
     </el-form>
   </el-card>
@@ -70,9 +70,19 @@
 
         reader.onload = (ev) => {
           this.form.privateKey = (ev.target.result || '').trim()
-          this.$refs['form'].validate((valid) => console.log(valid))
+          this.$refs['form'].validate()
         }
         reader.readAsText(file.raw)
+      },
+
+      onSubmit () {
+        this.$refs['form'].validate((valid) => {
+          if (valid) {
+            alert('go to next page')
+          } else {
+            return false
+          }
+        })
       }
     }
   }
