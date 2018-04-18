@@ -4,4 +4,7 @@ $--color-primary: #e2232d;
 /* icon font path, required */
 $--font-path: '~element-ui/lib/theme-chalk/fonts';
 
+/* input:focus border color */
+$--input-focus-border: #409eff;
+
 @import "~element-ui/packages/theme-chalk/src/index";
