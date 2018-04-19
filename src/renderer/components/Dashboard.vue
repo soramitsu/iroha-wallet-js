@@ -1,18 +1,21 @@
 <template>
   <el-container class="dashboard-container">
-    <el-aside class="aside">
-      <el-menu
-        default-active="1"
-      >
-        <el-menu-item index="1">summary</el-menu-item>
-        <el-menu-item index="2">wallets</el-menu-item>
-        <el-menu-item index="3">logout</el-menu-item>
-      </el-menu>
-    </el-aside>
+    <div class="aside">
+      <div class="sidemenu" default-active="1">
+        <div class="sidemenu__top">
+          <a class="sidemenu__item" index="1">summary</a>
+          <a class="sidemenu__item" index="2">wallets</a>
+        </div>
 
-    <el-main>
+        <div class="sidemenu__bottom">
+          <router-link class="sidemenu__item" index="3" to="/login">logout</router-link>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
       <router-view></router-view>
-    </el-main>
+    </div>
   </el-container>
 </template>
 
@@ -30,7 +33,28 @@
   }
 
   .aside {
-    width: 3rem;
+    $sidemenu-width: 100px;
+
+    width: $sidemenu-width;
     background-color: $--color-primary;
+
+    .sidemenu {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+
+      &__item {
+        display: block;
+        width: 100%;
+        height: $sidemenu-width;
+        color: white;
+        text-align: center;
+      }
+    }
+  }
+
+  .main {
+    flex: 1;
   }
 </style>
