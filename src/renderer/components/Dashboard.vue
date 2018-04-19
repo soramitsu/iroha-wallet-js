@@ -1,6 +1,6 @@
 <template>
   <el-container class="dashboard-container">
-    <el-aside>
+    <el-aside class="aside">
       <el-menu
         default-active="1"
       >
@@ -22,8 +22,15 @@
   }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  @import "~@/styles/element-variables.scss";
+
   .dashboard-container {
     min-height: 100vh;
+  }
+
+  .aside {
+    width: 3rem;
+    background-color: $--color-primary;
   }
 </style>
