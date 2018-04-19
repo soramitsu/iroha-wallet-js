@@ -65,8 +65,8 @@
           ],
           nodeIp: [
             { required: true, message: 'Please input node ip', trigger: 'change' },
-            // Check an input as IP if it starts with 0-9 (e.g. "255.255.255.255"), or treat the input as a domain name and accept it.
-            { pattern: /(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^[^0-9])/, message: 'Invalid IP', trigger: 'change' }
+            // Check an input as IP if it starts with 0-9 (e.g. "255.255.255.255", "255.255.255.255:12345"), or treat the input as a domain name and accept it with no validation.
+            { pattern: /(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:[0-9]{1,5})?$|^[^0-9])/, message: 'Invalid IP', trigger: 'change' }
           ]
         }
       }
