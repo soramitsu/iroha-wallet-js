@@ -86,7 +86,7 @@
       onSubmit () {
         this.$refs['form'].validate((valid) => {
           if (valid) {
-            this.$router.push('summary')
+            this.$router.push('summary-page')
           } else {
             return false
           }
