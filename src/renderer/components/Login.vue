@@ -2,29 +2,27 @@
   <el-card class="login-form-container">
     <img id="logo" class="logo" src="~@/assets/logo.svg" alt="Iroha">
 
-    <el-form ref="form" :model="form" :rules="rules" label-position="top">
+    <el-form class="login-form" ref="form" :model="form" :rules="rules" label-position="top">
       <el-form-item label="username:" prop="username">
         <el-input name="username" v-model="form.username"></el-input>
       </el-form-item>
 
       <el-form-item label="private key:" prop="privateKey">
         <el-row type="flex" justify="space-between">
-          <el-col :span="17">
+          <el-col :span="20">
             <el-input name="privateKey" v-model="form.privateKey"></el-input>
           </el-col>
 
-          <el-col :span="6">
-            <el-upload
-              action=""
-              :auto-upload="false"
-              :show-file-list="false"
-              :on-change="onFileChosen"
-            >
-              <el-button>
-                <i class="el-icon-upload2"></i>
-              </el-button>
-            </el-upload>
-          </el-col>
+          <el-upload
+            action=""
+            :auto-upload="false"
+            :show-file-list="false"
+            :on-change="onFileChosen"
+          >
+            <el-button>
+              <i class="el-icon-upload2"></i>
+            </el-button>
+          </el-upload>
         </el-row>
       </el-form-item>
 
@@ -32,8 +30,14 @@
         <el-input v-model="form.nodeIp"></el-input>
       </el-form-item>
 
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit">Login</el-button>
+      <el-form-item class="login-button-container">
+        <el-button
+          class="login-button"
+          type="primary"
+          @click="onSubmit"
+        >
+          Login
+        </el-button>
       </el-form-item>
     </el-form>
   </el-card>
@@ -95,9 +99,18 @@
 <style scoped>
   .login-form-container {
     position: relative;
-    max-width: 30rem;
+    width: 30rem;
     overflow: visible;
-    padding-top: 3rem;
+    padding-top: 4rem;
+  }
+
+  /*
+    ElementUI renders .el-form-item__label without a data attribute,
+    so scoped styles doesn't work for it. The `>>>` combinator solves this problem.
+    https://vue-loader.vuejs.org/en/features/scoped-css.html
+  */
+  .login-form >>> .el-form-item__label {
+    line-height: 1;
   }
 
   .logo {
@@ -109,5 +122,15 @@
     margin: auto;
     z-index: 100;
     top: -5rem;
+  }
+
+  .login-button-container {
+    text-align: center;
+    margin: 30px 0 10px;
+  }
+
+  .login-button {
+    height: 4rem;
+    width: 10rem;
   }
 </style>
