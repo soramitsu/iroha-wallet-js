@@ -16,9 +16,16 @@ export default new Router({
       component: require('@/components/Login').default
     },
     {
-      path: '/summary-page',
-      name: 'summary-page',
-      component: require('@/components/SummaryPage').default
+      path: '/dashboard',
+      name: 'dashboard',
+      component: require('@/components/Dashboard').default,
+      children: [
+        {
+          path: 'summary-page',
+          name: 'summary-page',
+          component: require('@/components/SummaryPage').default
+        }
+      ]
     },
     {
       path: '*',
