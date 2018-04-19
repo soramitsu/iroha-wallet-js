@@ -93,8 +93,7 @@
 <style scoped>
   .login-form-container {
     position: relative;
-    max-width: 30rem;
-    margin: 10rem auto;
+    max-width: 35rem;
     overflow: visible;
     padding-top: 3rem;
   }

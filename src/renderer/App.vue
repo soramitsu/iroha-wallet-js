@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="app">
     <router-view></router-view>
   </div>
 </template>
@@ -14,5 +14,12 @@
   html,
   body {
     background: #c4c4c4;
+  }
+
+  .app {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
   }
 </style>
