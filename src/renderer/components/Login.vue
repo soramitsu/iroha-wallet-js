@@ -20,7 +20,9 @@
               :show-file-list="false"
               :on-change="onFileChosen"
             >
-              <el-button type="primary">choose</el-button>
+              <el-button>
+                <i class="el-icon-upload2"></i>
+              </el-button>
             </el-upload>
           </el-col>
         </el-row>
@@ -93,7 +95,7 @@
 <style scoped>
   .login-form-container {
     position: relative;
-    max-width: 35rem;
+    max-width: 30rem;
     overflow: visible;
     padding-top: 3rem;
   }
