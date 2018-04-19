@@ -11,5 +11,8 @@
 </script>
 
 <style>
-  /* CSS */
+  html,
+  body {
+    background: #c4c4c4;
+  }
 </style>
