@@ -86,7 +86,7 @@
       onSubmit () {
         this.$refs['form'].validate((valid) => {
           if (valid) {
-            alert('go to next page')
+            this.$router.push('/dashboard/summary-page')
           } else {
             return false
           }
