@@ -3,7 +3,7 @@
     <el-row class="summary-page__row" type="flex" :gutter="15">
       <el-col :span="12">
         <el-card class="user-card">
-          <div>accountname@domain</div>
+          <div class="user-card__account-id">accountname@domain</div>
           <div>Gender: Male</div>
           <div>Some other info: Kek</div>
           <div>Maybe other info: 12345</div>
@@ -62,6 +62,11 @@
 
   .user-card {
     height: 100%;
+
+    &__account-id {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
   }
 
   .wallet-card {
