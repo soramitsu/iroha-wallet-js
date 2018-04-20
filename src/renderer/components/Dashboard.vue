@@ -1,21 +1,31 @@
 <template>
   <el-container class="dashboard-container">
-    <div class="aside">
-      <div class="sidemenu" default-active="1">
+    <aside class="aside">
+      <div class="sidemenu">
         <div class="sidemenu__top">
-          <a class="sidemenu__item" index="1">summary</a>
-          <a class="sidemenu__item" index="2">wallets</a>
+          <router-link class="sidemenu__item" to="/dashboard/summary-page">
+            <i class="el-icon-menu sidemenu__icon"></i>
+            summary
+          </router-link>
+
+          <router-link class="sidemenu__item" to="/dashboard/wallets">
+            <i class="el-icon-menu sidemenu__icon"></i>
+            wallets
+          </router-link>
         </div>
 
         <div class="sidemenu__bottom">
-          <router-link class="sidemenu__item" index="3" to="/login">logout</router-link>
+          <router-link class="sidemenu__item" to="/login">
+            <i class="el-icon-back sidemenu__icon"></i>
+            logout
+          </router-link>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <div class="main">
+    <main class="main">
       <router-view></router-view>
-    </div>
+    </main>
   </el-container>
 </template>
 
@@ -50,6 +60,22 @@
         height: $sidemenu-width;
         color: white;
         text-align: center;
+        box-sizing: border-box;
+        padding: 10px;
+        text-decoration: none;
+        transition: .1s ease background;
+
+        &:hover {
+          background: darken($--color-primary, 5%);
+        }
+      }
+
+      .router-link-active {
+        color: black;
+      }
+
+      &__icon {
+        font-size: 60px;
       }
     }
   }
