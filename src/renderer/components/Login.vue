@@ -102,6 +102,7 @@
     width: 30rem;
     overflow: visible;
     padding-top: 4rem;
+    margin-top: 5rem;
   }
 
   /*
