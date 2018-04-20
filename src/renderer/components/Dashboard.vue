@@ -8,7 +8,7 @@
             summary
           </router-link>
 
-          <router-link class="sidemenu__item" to="/dashboard/wallets">
+          <router-link class="sidemenu__item" to="/dashboard/wallets-page">
             <i class="el-icon-menu sidemenu__icon"></i>
             wallets
           </router-link>
