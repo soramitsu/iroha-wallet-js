@@ -21,7 +21,10 @@
 
     <el-row class="summary-page__row">
       <el-card>
-        <el-table :data="transactions">
+        <el-table
+          class="transaction-table"
+          :data="transactions"
+        >
           <el-table-column prop="id" label="id"></el-table-column>
           <el-table-column prop="from" label="from"></el-table-column>
           <el-table-column prop="to" label="to"></el-table-column>
@@ -71,5 +74,20 @@
 
   .wallet-card {
     height: 100%;
+  }
+
+  .transaction-table {
+    &::before {
+      content: none; // removes an el-table's border
+    }
+
+    /deep/ th {
+      color: black;
+      background: #c4c4c4;
+    }
+
+    /deep/ td {
+      border: none;
+    }
   }
 </style>
