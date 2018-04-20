@@ -130,7 +130,7 @@
   }
 
   .login-button {
-    height: 4rem;
-    width: 10rem;
+    height: 3rem;
+    width: 8rem;
   }
 </style>
