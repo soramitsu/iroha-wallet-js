@@ -4,17 +4,18 @@
       <el-col :span="12">
         <el-card class="user-card">
           <div class="user-card__account-id">accountname@domain</div>
-          <div>Gender: Male</div>
-          <div>Some other info: Kek</div>
-          <div>Maybe other info: 12345</div>
+
+          <div v-for="(value, key) in user.info" :key="key">
+            {{ key }}: {{ value }}
+          </div>
         </el-card>
       </el-col>
 
       <el-col :span="12">
         <el-card class="wallet-card">
-          <div>dollar#russia: 100.00</div>
-          <div>yen#russia: 100.00</div>
-          <div>euro#russia: 100.00</div>
+          <div v-for="wallet in wallets" :key="wallet.name">
+            {{ wallet.name }} {{ wallet.amount }}
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -43,6 +44,21 @@
 
     data () {
       return {
+        user: {
+          accountId: 'accountname@domain',
+          info: {
+            'Gender': 'Male',
+            'Some other info': 'Kek',
+            'Maybe other info': '12345'
+          }
+        },
+
+        wallets: [
+          { name: 'dollar#russia', amount: '100.00' },
+          { name: 'yen#russia', amount: '100.00' },
+          { name: 'euro#russia', amount: '100.00' }
+        ],
+
         transactions: [
           { id: '1', from: 'roma@russia', to: 'you', amount: '100.00', currency: 'dollar#russia', date: '11.04.2017' },
           { id: '1', from: 'roma@russia', to: 'you', amount: '100.00', currency: 'dollar#russia', date: '11.04.2017' },
