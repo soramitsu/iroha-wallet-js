@@ -1,8 +1,8 @@
 <template>
-  <el-main>
-    <el-row>
+  <div class="summary-page">
+    <el-row class="summary-page__row" type="flex" :gutter="15">
       <el-col :span="12">
-        <el-card>
+        <el-card class="user-card">
           <div>accountname@domain</div>
           <div>Gender: Male</div>
           <div>Some other info: Kek</div>
@@ -11,7 +11,7 @@
       </el-col>
 
       <el-col :span="12">
-        <el-card>
+        <el-card class="wallet-card">
           <div>dollar#russia: 100.00</div>
           <div>yen#russia: 100.00</div>
           <div>euro#russia: 100.00</div>
@@ -19,17 +19,19 @@
       </el-col>
     </el-row>
 
-    <el-card>
-      <el-table :data="transactions">
-        <el-table-column prop="id" label="id"></el-table-column>
-        <el-table-column prop="from" label="from"></el-table-column>
-        <el-table-column prop="to" label="to"></el-table-column>
-        <el-table-column prop="amount" label="amount"></el-table-column>
-        <el-table-column prop="currency" label="currency"></el-table-column>
-        <el-table-column prop="date" label="date"></el-table-column>
-      </el-table>
-    </el-card>
-  </el-main>
+    <el-row class="summary-page__row">
+      <el-card>
+        <el-table :data="transactions">
+          <el-table-column prop="id" label="id"></el-table-column>
+          <el-table-column prop="from" label="from"></el-table-column>
+          <el-table-column prop="to" label="to"></el-table-column>
+          <el-table-column prop="amount" label="amount"></el-table-column>
+          <el-table-column prop="currency" label="currency"></el-table-column>
+          <el-table-column prop="date" label="date"></el-table-column>
+        </el-table>
+      </el-card>
+    </el-row>
+  </div>
 </template>
 
 <script>
@@ -49,5 +51,20 @@
   }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+  .summary-page {
+    margin: 20px 35px;
+
+    &__row {
+      margin: 0 0 20px;
+    }
+  }
+
+  .user-card {
+    height: 100%;
+  }
+
+  .wallet-card {
+    height: 100%;
+  }
 </style>
