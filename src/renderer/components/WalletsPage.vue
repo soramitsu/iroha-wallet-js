@@ -30,6 +30,29 @@
           { id: 'wallet-3', name: 'euro#russia', amount: '100.00' }
         ]
       }
+    },
+
+    watch: {
+      '$route' (to) {
+        // If moved from 'wallet' to 'wallets-page' (i.e. no wallet opens),
+        // open the default one.
+        if (to.name === 'wallets-page') {
+          this.openDefaultWallet()
+        }
+      }
+    },
+
+    mounted () {
+      // If moved from other pages to 'wallets-page', open the default one.
+      this.openDefaultWallet()
+    },
+
+    methods: {
+      openDefaultWallet () {
+        if (this.wallets[0]) {
+          this.$router.push({ name: 'wallet', params: { walletId: this.wallets[0].id } })
+        }
+      }
     }
   }
 </script>
@@ -52,6 +75,7 @@
       color: #7e7e7e;
       background: #9d9d9d;
       border: 1px solid #aaa;
+      border-right: 1px solid white;
       transition: .1s ease background;
 
       &:hover {
