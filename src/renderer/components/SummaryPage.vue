@@ -22,6 +22,7 @@
 
     <el-row class="summary-page__row">
       <el-card>
+        <!-- TODO: maybe this can be replaced with <transactions> -->
         <el-table
           class="transaction-table"
           :data="transactions"
