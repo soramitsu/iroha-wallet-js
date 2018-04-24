@@ -37,6 +37,8 @@
 </script>
 
 <style lang="scss" scoped>
+  @import "~@/styles/element-variables.scss";
+
   .wallets-page {
     display: flex;
   }
@@ -52,6 +54,11 @@
       color: #7e7e7e;
       background: #9d9d9d;
       border: 1px solid #aaa;
+      transition: .1s ease background;
+
+      &:hover {
+        background: darken(#9d9d9d, 5%);
+      }
     }
 
     .router-link-active {
@@ -63,5 +70,7 @@
   .main {
     flex: 1;
     height: 100vh;
+    background: white;
+    overflow: auto;
   }
 </style>
