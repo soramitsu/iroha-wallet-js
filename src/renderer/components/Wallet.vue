@@ -2,7 +2,7 @@
   <div class="wallet">
     {{ wallet.name }} {{ wallet.amount }}
 
-    <el-tabs v-model="activeTabName">
+    <el-tabs class="wallet__tabs" v-model="activeTabName">
       <el-tab-pane label="HISTORY" name="history">
         <transactions :walletId="wallet.id"></transactions>
       </el-tab-pane>
@@ -66,5 +66,18 @@
 
   .wallet {
     padding: 1rem 2rem;
+
+    &__tabs {
+      margin: 1rem 0;
+
+      /deep/ .el-tabs__header {
+        text-align: center;
+      }
+
+      /deep/ .el-tabs__nav {
+        float: none;
+        display: inline-block;
+      }
+    }
   }
 </style>
