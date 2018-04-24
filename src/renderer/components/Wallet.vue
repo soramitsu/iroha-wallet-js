@@ -1,12 +1,20 @@
 <template>
   <div class="wallet">
     {{ wallet.name }} {{ wallet.amount }}
+
+    <transactions :walletId="wallet.id"></transactions>
   </div>
 </template>
 
 <script>
+  import Transactions from '@/components/Transactions'
+
   export default {
     name: 'wallets-page',
+
+    components: {
+      Transactions
+    },
 
     data () {
       return {
