@@ -3,9 +3,9 @@
     <div class="sidemenu">
       <router-link
         v-for="wallet in wallets"
-        :key="wallet.name"
+        :key="wallet.id"
         class="sidemenu__item"
-        :to="'/dashboard/wallets-page/' + wallet.name"
+        :to="'/dashboard/wallets-page/' + wallet.id"
       >
         <div>{{ wallet.name }}</div>
         <div>{{ wallet.amount }}</div>
@@ -24,12 +24,10 @@
 
     data () {
       return {
-        // TODO: If each wallet has walletId, it can be used as a routing
-        // parameter. (i.e. /wallets-page/:walletId)
         wallets: [
-          { name: 'dollar#russia', amount: '100.00' },
-          { name: 'yen#russia', amount: '100.00' },
-          { name: 'euro#russia', amount: '100.00' }
+          { id: 'wallet-1', name: 'dollar#russia', amount: '100.00' },
+          { id: 'wallet-2', name: 'yen#russia', amount: '100.00' },
+          { id: 'wallet-3', name: 'euro#russia', amount: '100.00' }
         ]
       }
     }
