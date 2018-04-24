@@ -2,7 +2,15 @@
   <div class="wallet">
     {{ wallet.name }} {{ wallet.amount }}
 
-    <transactions :walletId="wallet.id"></transactions>
+    <el-tabs v-model="activeTabName">
+      <el-tab-pane label="HISTORY" name="history">
+        <transactions :walletId="wallet.id"></transactions>
+      </el-tab-pane>
+
+      <el-tab-pane label="SEND" name="send">
+        send
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
@@ -18,12 +26,16 @@
 
     data () {
       return {
+        activeTabName: 'history',
         wallet: {}
       }
     },
 
     watch: {
       '$route' (to, from) {
+        // Back to HISTORY tab on switching to a different wallet
+        this.activeTabName = 'history'
+
         this.fetchWalletByWalletId(this.$route.params.walletId)
       }
     },
