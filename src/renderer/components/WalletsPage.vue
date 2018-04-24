@@ -7,12 +7,12 @@
         class="sidemenu__item"
         :to="'/dashboard/wallets-page/' + wallet.name"
       >
-        {{ wallet.name }}
-        {{ wallet.amount }}
+        <div>{{ wallet.name }}</div>
+        <div>{{ wallet.amount }}</div>
       </router-link>
     </div>
 
-    <div>
+    <div class="main">
       <router-view></router-view>
     </div>
   </div>
@@ -37,9 +37,31 @@
 </script>
 
 <style lang="scss" scoped>
+  .wallets-page {
+    display: flex;
+  }
+
   .sidemenu {
+    $sidemenu-width: 150px;
+
     &__item {
       display: block;
+      width: $sidemenu-width;
+      padding: 1rem;
+      text-decoration: none;
+      color: #7e7e7e;
+      background: #9d9d9d;
+      border: 1px solid #aaa;
     }
+
+    .router-link-active {
+      background: white;
+      color: inherit;
+    }
+  }
+
+  .main {
+    flex: 1;
+    height: 100vh;
   }
 </style>
