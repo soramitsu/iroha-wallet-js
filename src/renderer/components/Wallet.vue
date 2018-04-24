@@ -1,6 +1,6 @@
 <template>
   <div class="wallet">
-    {{ wallet.id }}
+    {{ wallet.name }} {{ wallet.amount }}
   </div>
 </template>
 
