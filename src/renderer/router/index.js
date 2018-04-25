@@ -24,6 +24,18 @@ export default new Router({
           path: 'summary-page',
           name: 'summary-page',
           component: require('@/components/SummaryPage').default
+        },
+        {
+          path: 'wallets-page',
+          name: 'wallets-page',
+          component: require('@/components/WalletsPage').default,
+          children: [
+            {
+              path: ':walletId',
+              name: 'wallet',
+              component: require('@/components/Wallet').default
+            }
+          ]
         }
       ]
     },
