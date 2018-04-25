@@ -4,11 +4,11 @@
       class="transaction-table"
       :data="transactions"
     >
-      <el-table-column prop="id" label="id" width="40"></el-table-column>
-      <el-table-column prop="from" label="from"></el-table-column>
-      <el-table-column prop="to" label="to"></el-table-column>
-      <el-table-column prop="amount" label="amount"></el-table-column>
-      <el-table-column prop="date" label="date"></el-table-column>
+      <el-table-column prop="id" label="id" width="40" />
+      <el-table-column prop="from" label="from" />
+      <el-table-column prop="to" label="to" />
+      <el-table-column prop="amount" label="amount" />
+      <el-table-column prop="date" label="date" />
     </el-table>
   </div>
 </template>
