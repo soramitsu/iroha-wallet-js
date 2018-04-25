@@ -87,19 +87,4 @@
 
 <style lang="scss" scoped>
   @import "~@/styles/element-variables.scss";
-
-  .transaction-table {
-    &::before {
-      content: none; // removes an el-table's border
-    }
-
-    /deep/ th {
-      color: black;
-      background: #c4c4c4;
-    }
-
-    /deep/ td {
-      border: none;
-    }
-  }
 </style>
