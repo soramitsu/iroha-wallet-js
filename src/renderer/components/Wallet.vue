@@ -8,7 +8,7 @@
       </el-tab-pane>
 
       <el-tab-pane label="SEND" name="send">
-        send
+        <transfer-form></transfer-form>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -17,12 +17,14 @@
 <script>
   import _ from 'lodash'
   import Transactions from '@/components/Transactions'
+  import TransferForm from '@/components/TransferForm'
 
   export default {
     name: 'wallets-page',
 
     components: {
-      Transactions
+      Transactions,
+      TransferForm
     },
 
     data () {
