@@ -24,7 +24,7 @@
     </aside>
 
     <main class="main">
-      <router-view></router-view>
+      <router-view />
     </main>
   </el-container>
 </template>

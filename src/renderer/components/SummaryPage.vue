@@ -22,25 +22,21 @@
 
     <el-row class="summary-page__row">
       <el-card>
-        <el-table
-          class="transaction-table"
-          :data="transactions"
-        >
-          <el-table-column prop="id" label="id"></el-table-column>
-          <el-table-column prop="from" label="from"></el-table-column>
-          <el-table-column prop="to" label="to"></el-table-column>
-          <el-table-column prop="amount" label="amount"></el-table-column>
-          <el-table-column prop="currency" label="currency"></el-table-column>
-          <el-table-column prop="date" label="date"></el-table-column>
-        </el-table>
+        <transactions :transactions="transactions" currency />
       </el-card>
     </el-row>
   </div>
 </template>
 
 <script>
+  import Transactions from '@/components/Transactions'
+
   export default {
     name: 'summary-page',
+
+    components: {
+      Transactions
+    },
 
     data () {
       return {
