@@ -11,7 +11,7 @@
         <transfer-form
           ref="form"
           v-model="form"
-          :maxDecimalDigits="5"
+          :maxDecimalDigits="maxDecimalDigits"
           @submit="onSubmit"
         ></transfer-form>
       </el-tab-pane>
@@ -37,7 +37,8 @@
         activeTabName: 'history',
         wallet: {},
         transactions: [],
-        form: {}
+        form: {},
+        maxDecimalDigits: 0
       }
     },
 
@@ -50,15 +51,17 @@
         // Reset the instance's data c.f. https://github.com/vuejs/vue/issues/702
         Object.assign(this.$data, this.$options.data())
 
-        this.$refs['form'].clearValidationMessage()
         this.fetchWalletByWalletId(this.$route.params.walletId)
         this.fetchTransactionsByWalletId(this.$route.params.walletId)
+        this.updateMaxDecimalDegits()
+        this.$nextTick(() => this.$refs['form'].clearValidationMessage())
       }
     },
 
     created () {
       this.fetchWalletByWalletId(this.$route.params.walletId)
       this.fetchTransactionsByWalletId(this.$route.params.walletId)
+      this.updateMaxDecimalDegits()
     },
 
     methods: {
@@ -105,6 +108,13 @@
           .chain()
           .sampleSize(_.random(3, 20))
           .value()
+      },
+
+      /**
+       * TODO: This is dummy. maxDecimalDigits is different for every asset
+       */
+      updateMaxDecimalDegits () {
+        this.maxDecimalDigits = _.random(0, 5)
       },
 
       onSubmit () {

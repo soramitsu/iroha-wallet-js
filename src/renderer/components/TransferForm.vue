@@ -42,18 +42,22 @@
     props: {
       form: Object,
       maxDecimalDigits: {
-        validator: v => Number.isInteger(v) && v >= 1
+        validator: v => Number.isInteger(v) && v >= 0
       }
     },
 
-    data () {
-      // `maxDecimalDigits` specifies the maximum number of digits after decimal point.
-      // e.g. if maxDecimalDigits == 5 then '100.12345' is ok
-      const amountRegexp = RegExp(`^[1-9][0-9]{0,32}(\\.[0-9]{1,${this.maxDecimalDigits}})?$`)
-      const amountMessage = `"AMOUNT" should be a number of max ${this.maxDecimalDigits} decimal digits.`
+    computed: {
+      rules () {
+        // `maxDecimalDigits` specifies the maximum number of digits after decimal point.
+        // e.g. if maxDecimalDigits == 5 then '100.12345' is ok
+        const amountRegexp = (this.maxDecimalDigits !== 0)
+          ? RegExp(`^[1-9][0-9]*(\\.[0-9]{1,${this.maxDecimalDigits}})?$`)
+          : RegExp(`^[1-9][0-9]*$`)
+        const amountMessage = (this.maxDecimalDigits !== 0)
+          ? `"AMOUNT" should be a number of max ${this.maxDecimalDigits} decimal digits.`
+          : `"AMOUNT" should be an integer.`
 
-      return {
-        rules: {
+        return {
           to: [
             { required: true, message: 'Please input "TO"', trigger: 'change' },
             { pattern: /^[a-z_0-9]{1,32}@[a-z_0-9]{1,9}$/, message: '"TO" should match [a-Z_0-9]{1,32}@[a-Z_0-9]{1,9}', trigger: 'change' }
