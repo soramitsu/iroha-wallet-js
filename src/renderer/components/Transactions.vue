@@ -8,6 +8,7 @@
       <el-table-column prop="from" label="from" />
       <el-table-column prop="to" label="to" />
       <el-table-column prop="amount" label="amount" />
+      <el-table-column v-if="currency" prop="currency" label="currency" />
       <el-table-column prop="date" label="date">
         <template slot-scope="scope">
           <span>{{ scope.row.date | formatDate }}</span>
@@ -24,7 +25,11 @@
     name: 'transactions',
 
     props: {
-      transactions: Array
+      transactions: Array,
+      currency: {
+        type: Boolean,
+        default: false
+      }
     },
 
     filters: {
