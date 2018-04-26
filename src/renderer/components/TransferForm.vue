@@ -1,22 +1,26 @@
 <template>
-  <el-form class="transfer-form" :model="form" label-width="6rem">
+  <el-form
+    class="transfer-form"
+    :model="form"
+    label-width="6rem"
+  >
     <el-form-item label="TO:">
-      <el-input v-model="form.to"></el-input>
+      <el-input v-model="form.to" />
     </el-form-item>
 
     <el-form-item label="AMOUNT:">
-      <el-input v-model="form.amount" type="number"></el-input>
+      <el-input v-model="form.amount" type="number" />
     </el-form-item>
 
     <el-form-item label="MESSAGE:">
-      <el-input v-model="form.message" type="textarea"></el-input>
+      <el-input v-model="form.message" type="textarea" />
     </el-form-item>
 
     <el-form-item class="send-button-container">
       <el-button
         class="send-button"
         type="primary"
-        @click="onSubmit"
+        @click="$emit('submit')"
       >
         SEND
       </el-button>
@@ -28,29 +32,16 @@
   export default {
     name: 'transfer-form',
 
-    props: {
+    model: {
+      prop: 'form',
+      event: 'change'
     },
 
-    data () {
-      return {
-        form: {
-          to: null,
-          amount: null,
-          message: null
-        }
-      }
-    },
-
-    updated () {
-      console.log('updated')
-    },
+    props: ['form'],
 
     watch: {
-    },
-
-    methods: {
-      onSubmit () {
-        alert('send!')
+      form (to) {
+        this.$emit('change', to)
       }
     }
   }
