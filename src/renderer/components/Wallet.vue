@@ -91,9 +91,6 @@
         ])
           .chain()
           .sampleSize(_.random(3, 20))
-          .map((d) => {
-            return d
-          })
           .value()
       }
     }
