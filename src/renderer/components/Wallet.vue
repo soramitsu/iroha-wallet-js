@@ -8,7 +8,12 @@
       </el-tab-pane>
 
       <el-tab-pane label="SEND" name="send">
-        <transfer-form v-model="form" @submit="onSubmit"></transfer-form>
+        <transfer-form
+          ref="form"
+          v-model="form"
+          :maxDecimalDigits="5"
+          @submit="onSubmit"
+        ></transfer-form>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -45,6 +50,7 @@
         // Reset the instance's data c.f. https://github.com/vuejs/vue/issues/702
         Object.assign(this.$data, this.$options.data())
 
+        this.$refs['form'].clearValidationMessage()
         this.fetchWalletByWalletId(this.$route.params.walletId)
         this.fetchTransactionsByWalletId(this.$route.params.walletId)
       }
