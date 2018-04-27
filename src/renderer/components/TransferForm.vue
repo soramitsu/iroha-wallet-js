@@ -95,8 +95,6 @@
 </script>
 
 <style lang="scss" scoped>
-  @import "~@/styles/element-variables.scss";
-
   .transfer-form {
     margin: 2rem 4rem 0 0;
 
