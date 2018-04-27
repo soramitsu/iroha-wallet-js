@@ -8,7 +8,12 @@
       </el-tab-pane>
 
       <el-tab-pane label="SEND" name="send">
-        <transfer-form v-model="form" @submit="onSubmit"></transfer-form>
+        <transfer-form
+          ref="form"
+          v-model="form"
+          :maxDecimalDigits="maxDecimalDigits"
+          @submit="onSubmit"
+        ></transfer-form>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -32,7 +37,8 @@
         activeTabName: 'history',
         wallet: {},
         transactions: [],
-        form: {}
+        form: {},
+        maxDecimalDigits: 0
       }
     },
 
@@ -47,12 +53,15 @@
 
         this.fetchWalletByWalletId(this.$route.params.walletId)
         this.fetchTransactionsByWalletId(this.$route.params.walletId)
+        this.updateMaxDecimalDegits()
+        this.$nextTick(() => this.$refs['form'].clearValidationMessage())
       }
     },
 
     created () {
       this.fetchWalletByWalletId(this.$route.params.walletId)
       this.fetchTransactionsByWalletId(this.$route.params.walletId)
+      this.updateMaxDecimalDegits()
     },
 
     methods: {
@@ -99,6 +108,13 @@
           .chain()
           .sampleSize(_.random(3, 20))
           .value()
+      },
+
+      /**
+       * TODO: This is dummy. maxDecimalDigits is different for every asset
+       */
+      updateMaxDecimalDegits () {
+        this.maxDecimalDigits = _.random(0, 5)
       },
 
       onSubmit () {
