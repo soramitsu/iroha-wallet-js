@@ -8,7 +8,7 @@
       </el-tab-pane>
 
       <el-tab-pane label="SEND" name="send">
-        send
+        <transfer-form v-model="form" @submit="onSubmit"></transfer-form>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -17,26 +17,33 @@
 <script>
   import _ from 'lodash'
   import Transactions from '@/components/Transactions'
+  import TransferForm from '@/components/TransferForm'
 
   export default {
     name: 'wallets-page',
 
     components: {
-      Transactions
+      Transactions,
+      TransferForm
     },
 
     data () {
       return {
         activeTabName: 'history',
         wallet: {},
-        transactions: []
+        transactions: [],
+        form: {}
       }
     },
 
     watch: {
+      /**
+       * React to params changes and reuse the same component
+       * c.f. https://router.vuejs.org/en/essentials/dynamic-matching.html
+       */
       '$route' (to, from) {
-        // Back to HISTORY tab on switching to a different wallet
-        this.activeTabName = 'history'
+        // Reset the instance's data c.f. https://github.com/vuejs/vue/issues/702
+        Object.assign(this.$data, this.$options.data())
 
         this.fetchWalletByWalletId(this.$route.params.walletId)
         this.fetchTransactionsByWalletId(this.$route.params.walletId)
@@ -92,6 +99,10 @@
           .chain()
           .sampleSize(_.random(3, 20))
           .value()
+      },
+
+      onSubmit () {
+        alert(`send: ${JSON.stringify(this.form)}`)
       }
     }
   }
