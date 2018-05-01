@@ -10,50 +10,196 @@ const path = require('path')
 const iroha = require('iroha-lib')
 const grpc = require('grpc')
 
-// const PEER_IP = '51.15.244.195'
-const PEER_IP = 'localhost'
-
 const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
 const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
+const pbResponse = require('iroha-lib/pb/responses_pb.js')
 const txBuilder = new iroha.ModelTransactionBuilder()
 const queryBuilder = new iroha.ModelQueryBuilder()
 const protoTxHelper = new iroha.ModelProtoTransaction()
 const protoQueryHelper = new iroha.ModelProtoQuery()
 const crypto = new iroha.ModelCrypto()
 
-const creator = 'admin@test'
-const adminPriv = fs.readFileSync(path.join(__dirname, '/admin@test.priv')).toString()
-const adminPub = fs.readFileSync(path.join(__dirname, '/admin@test.pub')).toString()
-const keys = crypto.convertFromExisting(adminPub, adminPriv)
+/*
+ * storage
+ * maybe localstorage or in memory
+ */
+const storage = {
+  username: null,
+  keys: null,
+  nodeIp: null
+}
 
-fetchAccount()
-  .then((account) => {
-    debug('account', account)
+/*
+ * user inputs
+ */
+const username = 'admin@test'
+const privateKey = fs.readFileSync(path.join(__dirname, '/admin@test.priv')).toString()
+// const nodeIp = '51.15.244.195:50051'
+const nodeIp = 'localhost:50051'
+
+/*
+login(username, privateKey, nodeIp)
+  .then(() => {
+    return createAsset({
+      asset_name: 'coolcoin',
+      domain_id: 'test',
+      precision: 2
+    })
   })
-  .then(createAsset)
-  .then(() => debug('done!'))
+  .then(() => {
+    return createAsset({
+      asset_name: 'supercoin',
+      domain_id: 'test',
+      precision: 5
+    })
+  })
+*/
+
+login(username, privateKey, nodeIp)
+  .then(transactions => {
+    debug('transactions', JSON.stringify(transactions, null, '  '))
+
+    return getAccountAssetTransactions(storage.username, 'coolcoin#test')
+  })
+  .then(transactions => {
+    debug('transactions', JSON.stringify(transactions, null, '  '))
+  })
   .catch(err => console.error(err))
 
-function createAsset () {
+/**
+ * ===== functions =====
+ */
+function login (username, privateKey, nodeIp) {
+  const keys = crypto.convertFromExisting(
+    crypto.fromPrivateKey(privateKey).publicKey().hex(),
+    privateKey
+  )
+
+  storage.username = username
+  storage.keys = keys
+  storage.nodeIp = nodeIp
+
+  return getAccount(username)
+    .then(account => {
+      debug('login succeeded!')
+    })
+    .catch(err => {
+      debug('login failed')
+      throw err
+    })
+}
+
+function getAccount (accountId) {
+  debug('starting getAccount...')
+
+  const queryClient = new endpointGrpc.QueryServiceClient(
+    storage.nodeIp,
+    grpc.credentials.createInsecure()
+  )
+  const query = queryBuilder
+    .creatorAccountId(storage.username)
+    .createdTime(Date.now())
+    .queryCounter(1)
+    .getAccount(accountId)
+    .build()
+  const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
+
+  debug('submitting query...')
+  debug('peer ip:', storage.nodeIp)
+  debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
+  debug('')
+
+  return new Promise((resolve, reject) => {
+    queryClient.find(protoQuery, (err, response) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted query successfully!')
+
+      const type = response.getResponseCase()
+      const responseName = getProtoEnumName(
+        pbResponse.QueryResponse.ResponseCase,
+        'iroha.protocol.QueryResponse',
+        type
+      )
+
+      if (responseName !== 'ACCOUNT_RESPONSE') {
+        return reject(new Error(`Query response error: expected=ACCOUNT_RESPONSE, actual=${responseName}`))
+      }
+
+      const account = response.getAccountResponse().getAccount()
+
+      resolve(account.toObject())
+    })
+  })
+}
+
+function getAccountAssetTransactions (accountId, assetId) {
+  debug('starting getAccountAssetTransactions...')
+
+  const queryClient = new endpointGrpc.QueryServiceClient(
+    storage.nodeIp,
+    grpc.credentials.createInsecure()
+  )
+  const query = queryBuilder
+    .creatorAccountId(storage.username)
+    .createdTime(Date.now())
+    .queryCounter(1)
+    .getAccountAssetTransactions(accountId, assetId)
+    .build()
+  const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
+
+  debug('submitting query...')
+  debug('peer ip:', storage.nodeIp)
+  debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
+  debug('')
+
+  return new Promise((resolve, reject) => {
+    queryClient.find(protoQuery, (err, response) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted query successfully!')
+
+      const type = response.getResponseCase()
+      const responseName = getProtoEnumName(
+        pbResponse.QueryResponse.ResponseCase,
+        'iroha.protocol.QueryResponse',
+        type
+      )
+
+      if (responseName !== 'TRANSACTIONS_RESPONSE') {
+        return reject(new Error(`Query response error: expected=TRANSACTIONS_RESPONSE, actual=${responseName}`))
+      }
+
+      const transactions = response.getTransactionsResponse().toObject().transactionsList
+
+      resolve(transactions)
+    })
+  })
+}
+
+function createAsset (asset) {
   debug('starting createAsset...')
 
   const tx = txBuilder
-    .creatorAccountId(creator)
+    .creatorAccountId(storage.username)
     .txCounter(1)
     .createdTime(Date.now())
-    .createDomain('ru', 'user')
-    .createAsset('coolcoin', 'test', 2)
+    .createAsset(asset.asset_name, asset.domain_id, asset.precision)
     .build()
   const txClient = new endpointGrpc.CommandServiceClient(
-    PEER_IP + ':50051',
+    storage.nodeIp,
     grpc.credentials.createInsecure()
   )
-  const protoTx = makeProtoTxWithKeys(tx, keys)
+  const protoTx = makeProtoTxWithKeys(tx, storage.keys)
   const txHash = blob2array(tx.hash().blob())
 
   debug('submitting transaction...')
-  debug('peer ip:', PEER_IP)
-  debug('creator account id:', protoTx.getPayload().getCreatorAccountId())
+  debug('peer ip:', storage.nodeIp)
+  debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
   debug('txhash:', Buffer.from(txHash).toString('hex'))
   debug('')
 
@@ -100,53 +246,6 @@ function createAsset () {
         })
       })
     })
-}
-
-function fetchAccount () {
-  debug('starting fetchAccount...')
-
-  const queryClient = new endpointGrpc.QueryServiceClient(
-    PEER_IP + ':50051',
-    grpc.credentials.createInsecure()
-  )
-  const query = queryBuilder
-    .creatorAccountId(creator)
-    .createdTime(Date.now())
-    .queryCounter(1)
-    .getAccount('admin@test')
-    .build()
-  const protoQuery = makeProtoQueryWithKeys(query, keys)
-
-  debug('submitting query...')
-  debug('peer ip:', PEER_IP)
-  debug('creator account id:', protoQuery.getPayload().getCreatorAccountId())
-  debug('')
-
-  return new Promise((resolve, reject) => {
-    queryClient.find(protoQuery, (err, response) => {
-      if (err) {
-        return reject(err)
-      }
-
-      debug('submitted query successfully!')
-
-      const type = response.getResponseCase()
-      const pbResponse = require('iroha-lib/pb/responses_pb.js')
-      const responseName = getProtoEnumName(
-        pbResponse.QueryResponse.ResponseCase,
-        'iroha.protocol.QueryResponse',
-        type
-      )
-
-      if (responseName !== 'ACCOUNT_RESPONSE') {
-        return reject(new Error(`Query response error: expected=ACCOUNT_RESPONSE, actual=${responseName}`))
-      }
-
-      const account = response.getAccountResponse().getAccount()
-
-      resolve(account.toObject())
-    })
-  })
 }
 
 /*
