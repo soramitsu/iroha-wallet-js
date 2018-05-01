@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "debug": "^3.1.0",
     "element-ui": "^2.3.4",
     "iroha-lib": "^0.0.6",
     "lodash": "^4.17.5",

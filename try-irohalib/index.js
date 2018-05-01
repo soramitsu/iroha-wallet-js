@@ -1,86 +1,89 @@
 /**
- * 2. Getting Started — Iroha 1.0 beta documentation
- * http://iroha.readthedocs.io/en/latest/getting_started/index.html?highlight=iroha%20cli#interacting-with-iroha-network
+ * # how to run
+ * ```
+ * DEBUG=try-irohalib node try-irohalib/index.js
+ * ```
  */
+const debug = require('debug')('try-irohalib')
 const fs = require('fs')
 const path = require('path')
 const iroha = require('iroha-lib')
+const grpc = require('grpc')
+
 // const PEER_IP = '51.15.244.195'
 const PEER_IP = 'localhost'
 
+const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
+const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
 const txBuilder = new iroha.ModelTransactionBuilder()
-const crypto = new iroha.ModelCrypto()
+const queryBuilder = new iroha.ModelQueryBuilder()
 const protoTxHelper = new iroha.ModelProtoTransaction()
+const protoQueryHelper = new iroha.ModelProtoQuery()
+const crypto = new iroha.ModelCrypto()
 
+const creator = 'admin@test'
 const adminPriv = fs.readFileSync(path.join(__dirname, '/admin@test.priv')).toString()
 const adminPub = fs.readFileSync(path.join(__dirname, '/admin@test.pub')).toString()
 const keys = crypto.convertFromExisting(adminPub, adminPriv)
 
-const currentTime = Date.now()
-const startTxCounter = 1
-const creator = 'admin@test'
+fetchAccount()
+  .then((account) => {
+    debug('account', account)
+  })
+  .then(createAsset)
+  .then(() => debug('done!'))
+  .catch(err => console.error(err))
 
-// build transaction
-const tx = txBuilder
-  .creatorAccountId(creator)
-  .txCounter(startTxCounter)
-  .createdTime(currentTime)
-  .createDomain('ru', 'user')
-  .createAsset('coolcoin', 'test', 2)
-  .build()
+function createAsset () {
+  debug('starting createAsset...')
 
-// sign transaction and get its binary representation (Blob)
-const txblob = protoTxHelper.signAndAddSignature(tx, keys).blob()
-const txArray = blob2array(txblob)
+  const tx = txBuilder
+    .creatorAccountId(creator)
+    .txCounter(1)
+    .createdTime(Date.now())
+    .createDomain('ru', 'user')
+    .createAsset('coolcoin', 'test', 2)
+    .build()
+  const txClient = new endpointGrpc.CommandServiceClient(
+    PEER_IP + ':50051',
+    grpc.credentials.createInsecure()
+  )
+  const protoTx = makeProtoTxWithKeys(tx, keys)
+  const txHash = blob2array(tx.hash().blob())
 
-// create proto object and send to iroha
-const blockTransaction = require('iroha-lib/pb/block_pb.js').Transaction // block_pb2.Transaction()
-const protoTx = blockTransaction.deserializeBinary(txArray)
+  debug('submitting transaction...')
+  debug('peer ip:', PEER_IP)
+  debug('creator account id:', protoTx.getPayload().getCreatorAccountId())
+  debug('txhash:', Buffer.from(txHash).toString('hex'))
+  debug('')
 
-const grpc = require('grpc')
-const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
-const client = new endpointGrpc.CommandServiceClient(
-  PEER_IP + ':50051',
-  grpc.credentials.createInsecure()
-)
-const txHashBlob = tx.hash().blob()
-const txHash = blob2array(txHashBlob)
+  return new Promise((resolve, reject) => {
+    txClient.torii(protoTx, (err, data) => {
+      if (err) {
+        return reject(err)
+      }
 
-console.log('peer ip:', PEER_IP)
-console.log('creator account id:', protoTx.getPayload().getCreatorAccountId())
-console.log('txhash:', Buffer.from(txHash).toString('hex'))
-console.log('')
-
-new Promise((resolve, reject) => {
-  console.log('Submit transaction...')
-
-  client.torii(protoTx, (err, data) => {
-    if (err) {
-      reject(err)
-    } else {
-      console.log('Submitted transaction successfully')
+      debug('submitted transaction successfully!')
       resolve()
-    }
+    })
   })
-})
-  .then(() => {
-    console.log('Sleep 5 seconds...')
-    return sleep(5000)
-  })
-  .then(() => {
-    console.log('Send transaction status request...')
+    .then(() => {
+      debug('sleep 5 seconds...')
+      return sleep(5000)
+    })
+    .then(() => {
+      debug('sending transaction status request...')
 
-    return new Promise((resolve, reject) => {
-      // create status request
-      const endpointPb = require('iroha-lib/pb/endpoint_pb.js')
-      const request = new endpointPb.TxStatusRequest()
+      return new Promise((resolve, reject) => {
+        const request = new pbEndpoint.TxStatusRequest()
 
-      request.setTxHash(txHash)
+        request.setTxHash(txHash)
 
-      client.status(request, (err, response) => {
-        if (err) {
-          reject(err)
-        } else {
+        txClient.status(request, (err, response) => {
+          if (err) {
+            return reject(err)
+          }
+
           const status = response.getTxStatus()
           const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
           const statusName = getProtoEnumName(
@@ -89,19 +92,66 @@ new Promise((resolve, reject) => {
             status
           )
 
-          console.log('Got transaction status: ' + statusName)
           if (statusName !== 'COMMITTED') {
-            reject(new Error("Your transaction wasn't committed"))
-          } else {
-            resolve()
+            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
           }
-        }
+
+          resolve()
+        })
       })
     })
-  })
-  .then(() => console.log('done!'))
-  .catch(err => console.log(err))
+}
 
+function fetchAccount () {
+  debug('starting fetchAccount...')
+
+  const queryClient = new endpointGrpc.QueryServiceClient(
+    PEER_IP + ':50051',
+    grpc.credentials.createInsecure()
+  )
+  const query = queryBuilder
+    .creatorAccountId(creator)
+    .createdTime(Date.now())
+    .queryCounter(1)
+    .getAccount('admin@test')
+    .build()
+  const protoQuery = makeProtoQueryWithKeys(query, keys)
+
+  debug('submitting query...')
+  debug('peer ip:', PEER_IP)
+  debug('creator account id:', protoQuery.getPayload().getCreatorAccountId())
+  debug('')
+
+  return new Promise((resolve, reject) => {
+    queryClient.find(protoQuery, (err, response) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted query successfully!')
+
+      const type = response.getResponseCase()
+      const pbResponse = require('iroha-lib/pb/responses_pb.js')
+      const responseName = getProtoEnumName(
+        pbResponse.QueryResponse.ResponseCase,
+        'iroha.protocol.QueryResponse',
+        type
+      )
+
+      if (responseName !== 'ACCOUNT_RESPONSE') {
+        return reject(new Error(`Query response error: expected=ACCOUNT_RESPONSE, actual=${responseName}`))
+      }
+
+      const account = response.getAccountResponse().getAccount()
+
+      resolve(account.toObject())
+    })
+  })
+}
+
+/*
+ *  ===== utilities ===
+ */
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -127,7 +177,7 @@ function getProtoEnumName (obj, key, value) {
     for (var k in obj) {
       let idx = obj[k]
       if (isNaN(idx)) {
-        console.log(
+        debug(
           'getProtoEnumName:wrong enum value, now is type of ' +
             typeof idx +
             ' should be integer'
@@ -138,4 +188,24 @@ function getProtoEnumName (obj, key, value) {
     }
     return getProtoEnumName(obj, key, value)
   }
+}
+
+function makeProtoQueryWithKeys (builtQuery, keys) {
+  const pbQuery = require('iroha-lib/pb/queries_pb.js').Query
+
+  const blob = protoQueryHelper.signAndAddSignature(builtQuery, keys).blob()
+  const arr = blob2array(blob)
+  const protoQuery = pbQuery.deserializeBinary(arr)
+
+  return protoQuery
+}
+
+function makeProtoTxWithKeys (builtTx, keys) {
+  const pbTransaction = require('iroha-lib/pb/queries_pb.js').Transaction
+
+  const blob = protoTxHelper.signAndAddSignature(builtTx, keys).blob()
+  const arr = blob2array(blob)
+  const protoTx = pbTransaction.deserializeBinary(arr)
+
+  return protoTx
 }
