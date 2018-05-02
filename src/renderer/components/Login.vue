@@ -44,6 +44,8 @@
 </template>
 
 <script>
+  import irohaUtil from 'util/iroha-util'
+
   export default {
     name: 'login',
 
@@ -86,7 +88,18 @@
       onSubmit () {
         this.$refs['form'].validate((valid) => {
           if (valid) {
-            this.$router.push('/dashboard/summary-page')
+            irohaUtil.login(
+              this.form.username,
+              this.form.privateKey,
+              this.form.nodeIp
+            )
+              .then(account => {
+                this.$router.push('/dashboard/summary-page')
+              })
+              .catch(err => {
+                // TODO: show the error
+                console.error(err)
+              })
           } else {
             return false
           }
