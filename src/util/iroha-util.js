@@ -1,12 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * # how to run
  * ```
- * DEBUG=try-irohalib node try-irohalib/index.js
+ * DEBUG=iroha-util node path/to/index.js
  * ```
  */
-const debug = require('debug')('try-irohalib')
-const fs = require('fs')
-const path = require('path')
+const debug = require('debug')('iroha-util')
 const iroha = require('iroha-lib')
 const grpc = require('grpc')
 
@@ -21,7 +20,6 @@ const crypto = new iroha.ModelCrypto()
 
 /*
  * storage
- * maybe localstorage or in memory
  */
 const storage = {
   username: null,
@@ -29,28 +27,31 @@ const storage = {
   nodeIp: null
 }
 
-/*
- * user inputs
- */
-const username = 'admin@test'
-const privateKey = fs.readFileSync(path.join(__dirname, '/admin@test.priv')).toString()
-// const nodeIp = '51.15.244.195:50051'
-const nodeIp = 'localhost:50051'
+// if this file is directly run
+if (require.main === module) {
+  /*
+  * user inputs
+  */
+  const username = 'admin@test'
+  const privateKey = '1d7e0a32ee0affeb4d22acd73c2c6fb6bd58e266c8c2ce4fa0ffe3dd6a253ffb'
+  // const nodeIp = '51.15.244.195:50051'
+  const nodeIp = 'localhost:50051'
 
-/*
-login(username, privateKey, nodeIp)
-  .then(() => createAsset('coolcoin', 'test', 2))
-  .then(() => createAsset('supercoin', 'test', 5))
-  .then(() => addAssetQuantity(storage.username, 'coolcoin#test', '200.50'))
-*/
+  /*
+  login(username, privateKey, nodeIp)
+    .then(() => createAsset('coolcoin', 'test', 2))
+    .then(() => createAsset('supercoin', 'test', 5))
+    .then(() => addAssetQuantity(storage.username, 'coolcoin#test', '200.50'))
+  */
 
-login(username, privateKey, nodeIp)
-  .then(() => getAccountAssets(storage.username, 'coolcoin#test'))
-  .then(() => transferAsset(storage.username, 'test@test', 'coolcoin#test', 'hello world', '1.00'))
-  .then(() => getAccountAssets(storage.username, 'coolcoin#test'))
-  .then(() => getAccountAssets('test@test', 'coolcoin#test'))
-  .then(() => getAccountAssetTransactions('test@test', 'coolcoin#test'))
-  .catch(err => console.error(err))
+  login(username, privateKey, nodeIp)
+    .then(() => getAccountAssets(storage.username, 'coolcoin#test'))
+    .then(() => transferAsset(storage.username, 'test@test', 'coolcoin#test', 'hello world', '1.00'))
+    .then(() => getAccountAssets(storage.username, 'coolcoin#test'))
+    .then(() => getAccountAssets('test@test', 'coolcoin#test'))
+    .then(() => getAccountAssetTransactions('test@test', 'coolcoin#test'))
+    .catch(err => console.error(err))
+}
 
 /**
  * ===== functions =====
@@ -482,4 +483,14 @@ function makeProtoTxWithKeys (builtTx, keys) {
   const protoTx = pbTransaction.deserializeBinary(arr)
 
   return protoTx
+}
+
+/*
+ *  ===== export ===
+ */
+export default {
+  login,
+  getAccount,
+  getAccountAssets,
+  getAccountAssetTransactions
 }
