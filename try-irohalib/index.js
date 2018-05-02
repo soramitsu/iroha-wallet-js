@@ -39,37 +39,25 @@ const nodeIp = 'localhost:50051'
 
 /*
 login(username, privateKey, nodeIp)
-  .then(() => {
-    return createAsset({
-      asset_name: 'coolcoin',
-      domain_id: 'test',
-      precision: 2
-    })
-  })
-  .then(() => {
-    return createAsset({
-      asset_name: 'supercoin',
-      domain_id: 'test',
-      precision: 5
-    })
-  })
+  .then(() => createAsset('coolcoin', 'test', 2))
+  .then(() => createAsset('supercoin', 'test', 5))
+  .then(() => addAssetQuantity(storage.username, 'coolcoin#test', '200.50'))
 */
 
 login(username, privateKey, nodeIp)
-  .then(transactions => {
-    debug('transactions', JSON.stringify(transactions, null, '  '))
-
-    return getAccountAssetTransactions(storage.username, 'coolcoin#test')
-  })
-  .then(transactions => {
-    debug('transactions', JSON.stringify(transactions, null, '  '))
-  })
+  .then(() => getAccountAssets(storage.username, 'coolcoin#test'))
+  .then(() => transferAsset(storage.username, 'test@test', 'coolcoin#test', 'hello world', '1.00'))
+  .then(() => getAccountAssets(storage.username, 'coolcoin#test'))
+  .then(() => getAccountAssets('test@test', 'coolcoin#test'))
+  .then(() => getAccountAssetTransactions('test@test', 'coolcoin#test'))
   .catch(err => console.error(err))
 
 /**
  * ===== functions =====
  */
 function login (username, privateKey, nodeIp) {
+  debug('starting login...')
+
   const keys = crypto.convertFromExisting(
     crypto.fromPrivateKey(privateKey).publicKey().hex(),
     privateKey
@@ -82,6 +70,7 @@ function login (username, privateKey, nodeIp) {
   return getAccount(username)
     .then(account => {
       debug('login succeeded!')
+      return account
     })
     .catch(err => {
       debug('login failed')
@@ -128,9 +117,11 @@ function getAccount (accountId) {
         return reject(new Error(`Query response error: expected=ACCOUNT_RESPONSE, actual=${responseName}`))
       }
 
-      const account = response.getAccountResponse().getAccount()
+      const account = response.getAccountResponse().getAccount().toObject()
 
-      resolve(account.toObject())
+      debug('account', account)
+
+      resolve(account)
     })
   })
 }
@@ -176,19 +167,203 @@ function getAccountAssetTransactions (accountId, assetId) {
 
       const transactions = response.getTransactionsResponse().toObject().transactionsList
 
+      debug('transactions', transactions)
+
       resolve(transactions)
     })
   })
 }
 
-function createAsset (asset) {
+function getAccountAssets (accountId, assetId) {
+  debug('starting getAccountAssets...')
+
+  const queryClient = new endpointGrpc.QueryServiceClient(
+    storage.nodeIp,
+    grpc.credentials.createInsecure()
+  )
+  const query = queryBuilder
+    .creatorAccountId(storage.username)
+    .createdTime(Date.now())
+    .queryCounter(1)
+    .getAccountAssets(accountId, assetId)
+    .build()
+  const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
+
+  debug('submitting query...')
+  debug('peer ip:', storage.nodeIp)
+  debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
+  debug('')
+
+  return new Promise((resolve, reject) => {
+    queryClient.find(protoQuery, (err, response) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted query successfully!')
+
+      const type = response.getResponseCase()
+      const responseName = getProtoEnumName(
+        pbResponse.QueryResponse.ResponseCase,
+        'iroha.protocol.QueryResponse',
+        type
+      )
+
+      if (responseName !== 'ACCOUNT_ASSETS_RESPONSE') {
+        return reject(new Error(`Query response error: expected=ACCOUNT_ASSETS_RESPONSE, actual=${responseName}`))
+      }
+
+      const assets = response.getAccountAssetsResponse().toObject()
+
+      debug('assets', assets)
+
+      resolve(assets)
+    })
+  })
+}
+
+function createAsset (assetName, domainId, precision) {
   debug('starting createAsset...')
 
   const tx = txBuilder
     .creatorAccountId(storage.username)
     .txCounter(1)
     .createdTime(Date.now())
-    .createAsset(asset.asset_name, asset.domain_id, asset.precision)
+    .createAsset(assetName, domainId, precision)
+    .build()
+  const txClient = new endpointGrpc.CommandServiceClient(
+    storage.nodeIp,
+    grpc.credentials.createInsecure()
+  )
+  const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+  const txHash = blob2array(tx.hash().blob())
+
+  debug('submitting transaction...')
+  debug('peer ip:', storage.nodeIp)
+  debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
+  debug('txhash:', Buffer.from(txHash).toString('hex'))
+  debug('')
+
+  return new Promise((resolve, reject) => {
+    txClient.torii(protoTx, (err, data) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted transaction successfully!')
+      resolve()
+    })
+  })
+    .then(() => {
+      debug('sleep 5 seconds...')
+      return sleep(5000)
+    })
+    .then(() => {
+      debug('sending transaction status request...')
+
+      return new Promise((resolve, reject) => {
+        const request = new pbEndpoint.TxStatusRequest()
+
+        request.setTxHash(txHash)
+
+        txClient.status(request, (err, response) => {
+          if (err) {
+            return reject(err)
+          }
+
+          const status = response.getTxStatus()
+          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
+          const statusName = getProtoEnumName(
+            TxStatus,
+            'iroha.protocol.TxStatus',
+            status
+          )
+
+          if (statusName !== 'COMMITTED') {
+            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
+          }
+
+          resolve()
+        })
+      })
+    })
+}
+
+function addAssetQuantity (accountId, assetId, amount) {
+  debug('starting addAssetQuantity...')
+
+  const tx = txBuilder
+    .creatorAccountId(storage.username)
+    .txCounter(1)
+    .createdTime(Date.now())
+    .addAssetQuantity(accountId, assetId, amount)
+    .build()
+  const txClient = new endpointGrpc.CommandServiceClient(
+    storage.nodeIp,
+    grpc.credentials.createInsecure()
+  )
+  const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+  const txHash = blob2array(tx.hash().blob())
+
+  debug('submitting transaction...')
+  debug('peer ip:', storage.nodeIp)
+  debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
+  debug('txhash:', Buffer.from(txHash).toString('hex'))
+  debug('')
+
+  return new Promise((resolve, reject) => {
+    txClient.torii(protoTx, (err, data) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted transaction successfully!')
+      resolve()
+    })
+  })
+    .then(() => {
+      debug('sleep 5 seconds...')
+      return sleep(5000)
+    })
+    .then(() => {
+      debug('sending transaction status request...')
+
+      return new Promise((resolve, reject) => {
+        const request = new pbEndpoint.TxStatusRequest()
+
+        request.setTxHash(txHash)
+
+        txClient.status(request, (err, response) => {
+          if (err) {
+            return reject(err)
+          }
+
+          const status = response.getTxStatus()
+          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
+          const statusName = getProtoEnumName(
+            TxStatus,
+            'iroha.protocol.TxStatus',
+            status
+          )
+
+          if (statusName !== 'COMMITTED') {
+            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
+          }
+
+          resolve()
+        })
+      })
+    })
+}
+
+function transferAsset (srcAccountId, destAccountId, assetId, description, amount) {
+  debug('starting transferAsset...')
+
+  const tx = txBuilder
+    .creatorAccountId(storage.username)
+    .txCounter(1)
+    .createdTime(Date.now())
+    .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
     .build()
   const txClient = new endpointGrpc.CommandServiceClient(
     storage.nodeIp,
