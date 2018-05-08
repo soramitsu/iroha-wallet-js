@@ -21,8 +21,9 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "test": "npm run unit && npm run e2e",
-    "unit": "karma start test/karma-unit/karma.conf.js",
+    "test": "npm run karma-unit && npm run e2e",
+    "karma-unit": "karma start test/karma-unit/karma.conf.js",
+    "unit": "NODE_ENV=test mocha --compilers js:babel-register --recursive $(find test/unit -name '*.spec.js')",
     "postinstall": "npm run lint:fix"
   },
   "dependencies": {
