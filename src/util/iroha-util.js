@@ -94,24 +94,24 @@ function logout () {
 function getAccount (accountId) {
   debug('starting getAccount...')
 
-  const queryClient = new endpointGrpc.QueryServiceClient(
-    storage.nodeIp,
-    grpc.credentials.createInsecure()
-  )
-  const query = queryBuilder
-    .creatorAccountId(storage.username)
-    .createdTime(Date.now())
-    .queryCounter(1)
-    .getAccount(accountId)
-    .build()
-  const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
-
-  debug('submitting query...')
-  debug('peer ip:', storage.nodeIp)
-  debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
-  debug('')
-
   return new Promise((resolve, reject) => {
+    const queryClient = new endpointGrpc.QueryServiceClient(
+      storage.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    const query = queryBuilder
+      .creatorAccountId(storage.username)
+      .createdTime(Date.now())
+      .queryCounter(1)
+      .getAccount(accountId)
+      .build()
+    const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
+
+    debug('submitting query...')
+    debug('peer ip:', storage.nodeIp)
+    debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
+    debug('')
+
     queryClient.find(protoQuery, (err, response) => {
       if (err) {
         return reject(err)
@@ -142,24 +142,24 @@ function getAccount (accountId) {
 function getAccountAssetTransactions (accountId, assetId) {
   debug('starting getAccountAssetTransactions...')
 
-  const queryClient = new endpointGrpc.QueryServiceClient(
-    storage.nodeIp,
-    grpc.credentials.createInsecure()
-  )
-  const query = queryBuilder
-    .creatorAccountId(storage.username)
-    .createdTime(Date.now())
-    .queryCounter(1)
-    .getAccountAssetTransactions(accountId, assetId)
-    .build()
-  const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
-
-  debug('submitting query...')
-  debug('peer ip:', storage.nodeIp)
-  debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
-  debug('')
-
   return new Promise((resolve, reject) => {
+    const queryClient = new endpointGrpc.QueryServiceClient(
+      storage.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    const query = queryBuilder
+      .creatorAccountId(storage.username)
+      .createdTime(Date.now())
+      .queryCounter(1)
+      .getAccountAssetTransactions(accountId, assetId)
+      .build()
+    const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
+
+    debug('submitting query...')
+    debug('peer ip:', storage.nodeIp)
+    debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
+    debug('')
+
     queryClient.find(protoQuery, (err, response) => {
       if (err) {
         return reject(err)
@@ -190,24 +190,24 @@ function getAccountAssetTransactions (accountId, assetId) {
 function getAccountAssets (accountId, assetId) {
   debug('starting getAccountAssets...')
 
-  const queryClient = new endpointGrpc.QueryServiceClient(
-    storage.nodeIp,
-    grpc.credentials.createInsecure()
-  )
-  const query = queryBuilder
-    .creatorAccountId(storage.username)
-    .createdTime(Date.now())
-    .queryCounter(1)
-    .getAccountAssets(accountId, assetId)
-    .build()
-  const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
-
-  debug('submitting query...')
-  debug('peer ip:', storage.nodeIp)
-  debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
-  debug('')
-
   return new Promise((resolve, reject) => {
+    const queryClient = new endpointGrpc.QueryServiceClient(
+      storage.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    const query = queryBuilder
+      .creatorAccountId(storage.username)
+      .createdTime(Date.now())
+      .queryCounter(1)
+      .getAccountAssets(accountId, assetId)
+      .build()
+    const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
+
+    debug('submitting query...')
+    debug('peer ip:', storage.nodeIp)
+    debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
+    debug('')
+
     queryClient.find(protoQuery, (err, response) => {
       if (err) {
         return reject(err)
@@ -238,26 +238,26 @@ function getAccountAssets (accountId, assetId) {
 function createAsset (assetName, domainId, precision) {
   debug('starting createAsset...')
 
-  const tx = txBuilder
-    .creatorAccountId(storage.username)
-    .txCounter(1)
-    .createdTime(Date.now())
-    .createAsset(assetName, domainId, precision)
-    .build()
-  const txClient = new endpointGrpc.CommandServiceClient(
-    storage.nodeIp,
-    grpc.credentials.createInsecure()
-  )
-  const protoTx = makeProtoTxWithKeys(tx, storage.keys)
-  const txHash = blob2array(tx.hash().blob())
-
-  debug('submitting transaction...')
-  debug('peer ip:', storage.nodeIp)
-  debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
-  debug('txhash:', Buffer.from(txHash).toString('hex'))
-  debug('')
-
   return new Promise((resolve, reject) => {
+    const tx = txBuilder
+      .creatorAccountId(storage.username)
+      .txCounter(1)
+      .createdTime(Date.now())
+      .createAsset(assetName, domainId, precision)
+      .build()
+    const txClient = new endpointGrpc.CommandServiceClient(
+      storage.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+    const txHash = blob2array(tx.hash().blob())
+
+    debug('submitting transaction...')
+    debug('peer ip:', storage.nodeIp)
+    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
+    debug('txhash:', Buffer.from(txHash).toString('hex'))
+    debug('')
+
     txClient.torii(protoTx, (err, data) => {
       if (err) {
         return reject(err)
@@ -305,26 +305,26 @@ function createAsset (assetName, domainId, precision) {
 function addAssetQuantity (accountId, assetId, amount) {
   debug('starting addAssetQuantity...')
 
-  const tx = txBuilder
-    .creatorAccountId(storage.username)
-    .txCounter(1)
-    .createdTime(Date.now())
-    .addAssetQuantity(accountId, assetId, amount)
-    .build()
-  const txClient = new endpointGrpc.CommandServiceClient(
-    storage.nodeIp,
-    grpc.credentials.createInsecure()
-  )
-  const protoTx = makeProtoTxWithKeys(tx, storage.keys)
-  const txHash = blob2array(tx.hash().blob())
-
-  debug('submitting transaction...')
-  debug('peer ip:', storage.nodeIp)
-  debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
-  debug('txhash:', Buffer.from(txHash).toString('hex'))
-  debug('')
-
   return new Promise((resolve, reject) => {
+    const tx = txBuilder
+      .creatorAccountId(storage.username)
+      .txCounter(1)
+      .createdTime(Date.now())
+      .addAssetQuantity(accountId, assetId, amount)
+      .build()
+    const txClient = new endpointGrpc.CommandServiceClient(
+      storage.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+    const txHash = blob2array(tx.hash().blob())
+
+    debug('submitting transaction...')
+    debug('peer ip:', storage.nodeIp)
+    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
+    debug('txhash:', Buffer.from(txHash).toString('hex'))
+    debug('')
+
     txClient.torii(protoTx, (err, data) => {
       if (err) {
         return reject(err)
@@ -372,26 +372,26 @@ function addAssetQuantity (accountId, assetId, amount) {
 function transferAsset (srcAccountId, destAccountId, assetId, description, amount) {
   debug('starting transferAsset...')
 
-  const tx = txBuilder
-    .creatorAccountId(storage.username)
-    .txCounter(1)
-    .createdTime(Date.now())
-    .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
-    .build()
-  const txClient = new endpointGrpc.CommandServiceClient(
-    storage.nodeIp,
-    grpc.credentials.createInsecure()
-  )
-  const protoTx = makeProtoTxWithKeys(tx, storage.keys)
-  const txHash = blob2array(tx.hash().blob())
-
-  debug('submitting transaction...')
-  debug('peer ip:', storage.nodeIp)
-  debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
-  debug('txhash:', Buffer.from(txHash).toString('hex'))
-  debug('')
-
   return new Promise((resolve, reject) => {
+    const tx = txBuilder
+      .creatorAccountId(storage.username)
+      .txCounter(1)
+      .createdTime(Date.now())
+      .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
+      .build()
+    const txClient = new endpointGrpc.CommandServiceClient(
+      storage.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+    const txHash = blob2array(tx.hash().blob())
+
+    debug('submitting transaction...')
+    debug('peer ip:', storage.nodeIp)
+    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
+    debug('txhash:', Buffer.from(txHash).toString('hex'))
+    debug('')
+
     txClient.torii(protoTx, (err, data) => {
       if (err) {
         return reject(err)
