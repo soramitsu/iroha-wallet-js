@@ -54,8 +54,8 @@ describe('iroha-util', () => {
     it('should fail to get nonexisting asset', done => {
       irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
         .then(() => irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID, NONEXISTING_ASSET))
-        .then(() => done())
-        .catch(err => done(err))
+        .then(() => done(new Error('query should fail')))
+        .catch(() => done())
     })
   })
 
