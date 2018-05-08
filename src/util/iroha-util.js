@@ -59,6 +59,10 @@ if (require.main === module) {
 function login (username, privateKey, nodeIp) {
   debug('starting login...')
 
+  if (privateKey.length !== 64) {
+    return Promise.reject(new Error('privateKey should have length of 64'))
+  }
+
   const keys = crypto.convertFromExisting(
     crypto.fromPrivateKey(privateKey).publicKey().hex(),
     privateKey
