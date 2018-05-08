@@ -24,7 +24,8 @@
     "test": "npm run karma-unit && npm run e2e",
     "karma-unit": "karma start test/karma-unit/karma.conf.js",
     "unit": "NODE_ENV=test mocha --compilers js:babel-register --recursive $(find test/unit -name '*.spec.js')",
-    "postinstall": "npm run lint:fix"
+    "postinstall": "npm run lint:fix",
+    "rebuild": "electron-rebuild --only grpc && node-pre-gyp --target=1.8.6 --runtime=electron --fallback-to-build --directory node_modules/iroha-lib reinstall"
   },
   "dependencies": {
     "axios": "^0.17.1",
