@@ -83,6 +83,14 @@ function login (username, privateKey, nodeIp) {
     })
 }
 
+function logout () {
+  storage.username = null
+  storage.keys = null
+  storage.nodeIp = null
+
+  return Promise.resolve()
+}
+
 function getAccount (accountId) {
   debug('starting getAccount...')
 
@@ -494,6 +502,7 @@ function makeProtoTxWithKeys (builtTx, keys) {
  */
 export default {
   login,
+  logout,
   getAccount,
   getAccountAssets,
   getAccountAssetTransactions
