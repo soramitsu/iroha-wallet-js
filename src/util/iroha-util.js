@@ -53,8 +53,14 @@ if (require.main === module) {
     .catch(err => console.error(err))
 }
 
-/**
+/*
  * ===== functions =====
+ */
+/**
+ * login
+ * @param {String} username
+ * @param {String} privateKey length is 64
+ * @param {String} nodeIp
  */
 function login (username, privateKey, nodeIp) {
   debug('starting login...')
@@ -83,6 +89,9 @@ function login (username, privateKey, nodeIp) {
     })
 }
 
+/**
+ * clear local cache
+ */
 function logout () {
   storage.username = null
   storage.keys = null
@@ -91,20 +100,24 @@ function logout () {
   return Promise.resolve()
 }
 
-function getAccount (accountId) {
-  debug('starting getAccount...')
-
+/*
+ * ===== queries =====
+ */
+/**
+ * wrapper function of queries
+ * @param {Function} buildQuery
+ * @param {Function} onResponse
+ */
+function sendQuery (
+  buildQuery = function () {},
+  onResponse = function (resolve, reject, responseName, response) {}
+) {
   return new Promise((resolve, reject) => {
     const queryClient = new endpointGrpc.QueryServiceClient(
       storage.nodeIp,
       grpc.credentials.createInsecure()
     )
-    const query = queryBuilder
-      .creatorAccountId(storage.username)
-      .createdTime(Date.now())
-      .queryCounter(1)
-      .getAccount(accountId)
-      .build()
+    const query = buildQuery()
     const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
 
     debug('submitting query...')
@@ -126,6 +139,28 @@ function getAccount (accountId) {
         type
       )
 
+      onResponse(resolve, reject, responseName, response)
+    })
+  })
+}
+
+/**
+ * getAccount https://hyperledger.github.io/iroha-api/#get-account
+ * @param {String} accountId
+ */
+function getAccount (accountId) {
+  debug('starting getAccount...')
+
+  return sendQuery(
+    () => {
+      return queryBuilder
+        .creatorAccountId(storage.username)
+        .createdTime(Date.now())
+        .queryCounter(1)
+        .getAccount(accountId)
+        .build()
+    },
+    (resolve, reject, responseName, response) => {
       if (responseName !== 'ACCOUNT_RESPONSE') {
         return reject(new Error(`Query response error: expected=ACCOUNT_RESPONSE, actual=${responseName}`))
       }
@@ -135,45 +170,28 @@ function getAccount (accountId) {
       debug('account', account)
 
       resolve(account)
-    })
-  })
+    }
+  )
 }
 
+/**
+ * getAccountAssetTransactions https://hyperledger.github.io/iroha-api/#get-account-asset-transactions
+ * @param {String} accountId
+ * @param {String} assetId
+ */
 function getAccountAssetTransactions (accountId, assetId) {
   debug('starting getAccountAssetTransactions...')
 
-  return new Promise((resolve, reject) => {
-    const queryClient = new endpointGrpc.QueryServiceClient(
-      storage.nodeIp,
-      grpc.credentials.createInsecure()
-    )
-    const query = queryBuilder
-      .creatorAccountId(storage.username)
-      .createdTime(Date.now())
-      .queryCounter(1)
-      .getAccountAssetTransactions(accountId, assetId)
-      .build()
-    const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
-
-    debug('submitting query...')
-    debug('peer ip:', storage.nodeIp)
-    debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
-    debug('')
-
-    queryClient.find(protoQuery, (err, response) => {
-      if (err) {
-        return reject(err)
-      }
-
-      debug('submitted query successfully!')
-
-      const type = response.getResponseCase()
-      const responseName = getProtoEnumName(
-        pbResponse.QueryResponse.ResponseCase,
-        'iroha.protocol.QueryResponse',
-        type
-      )
-
+  return sendQuery(
+    () => {
+      return queryBuilder
+        .creatorAccountId(storage.username)
+        .createdTime(Date.now())
+        .queryCounter(1)
+        .getAccountAssetTransactions(accountId, assetId)
+        .build()
+    },
+    (resolve, reject, responseName, response) => {
       if (responseName !== 'TRANSACTIONS_RESPONSE') {
         return reject(new Error(`Query response error: expected=TRANSACTIONS_RESPONSE, actual=${responseName}`))
       }
@@ -183,45 +201,28 @@ function getAccountAssetTransactions (accountId, assetId) {
       debug('transactions', transactions)
 
       resolve(transactions)
-    })
-  })
+    }
+  )
 }
 
+/**
+ * getAccountAssets https://hyperledger.github.io/iroha-api/#get-account-assets
+ * @param {String} accountId
+ * @param {String} assetId
+ */
 function getAccountAssets (accountId, assetId) {
   debug('starting getAccountAssets...')
 
-  return new Promise((resolve, reject) => {
-    const queryClient = new endpointGrpc.QueryServiceClient(
-      storage.nodeIp,
-      grpc.credentials.createInsecure()
-    )
-    const query = queryBuilder
-      .creatorAccountId(storage.username)
-      .createdTime(Date.now())
-      .queryCounter(1)
-      .getAccountAssets(accountId, assetId)
-      .build()
-    const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
-
-    debug('submitting query...')
-    debug('peer ip:', storage.nodeIp)
-    debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
-    debug('')
-
-    queryClient.find(protoQuery, (err, response) => {
-      if (err) {
-        return reject(err)
-      }
-
-      debug('submitted query successfully!')
-
-      const type = response.getResponseCase()
-      const responseName = getProtoEnumName(
-        pbResponse.QueryResponse.ResponseCase,
-        'iroha.protocol.QueryResponse',
-        type
-      )
-
+  return sendQuery(
+    () => {
+      return queryBuilder
+        .creatorAccountId(storage.username)
+        .createdTime(Date.now())
+        .queryCounter(1)
+        .getAccountAssets(accountId, assetId)
+        .build()
+    },
+    (resolve, reject, responseName, response) => {
       if (responseName !== 'ACCOUNT_ASSETS_RESPONSE') {
         return reject(new Error(`Query response error: expected=ACCOUNT_ASSETS_RESPONSE, actual=${responseName}`))
       }
@@ -231,12 +232,23 @@ function getAccountAssets (accountId, assetId) {
       debug('assets', assets)
 
       resolve(assets)
-    })
-  })
+    }
+  )
 }
 
+/*
+ * ===== commands =====
+ */
+/**
+ * createAsset https://hyperledger.github.io/iroha-api/#create-asset
+ * @param {String} assetName
+ * @param {String} domainId
+ * @param {Number} precision
+ */
 function createAsset (assetName, domainId, precision) {
   debug('starting createAsset...')
+
+  let txClient, txHash
 
   return new Promise((resolve, reject) => {
     const tx = txBuilder
@@ -245,12 +257,13 @@ function createAsset (assetName, domainId, precision) {
       .createdTime(Date.now())
       .createAsset(assetName, domainId, precision)
       .build()
-    const txClient = new endpointGrpc.CommandServiceClient(
+    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+
+    txClient = new endpointGrpc.CommandServiceClient(
       storage.nodeIp,
       grpc.credentials.createInsecure()
     )
-    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
-    const txHash = blob2array(tx.hash().blob())
+    txHash = blob2array(tx.hash().blob())
 
     debug('submitting transaction...')
     debug('peer ip:', storage.nodeIp)
@@ -302,8 +315,16 @@ function createAsset (assetName, domainId, precision) {
     })
 }
 
+/**
+ * addAssetQuantity https://hyperledger.github.io/iroha-api/#add-asset-quantity
+ * @param {String} accountId
+ * @param {String} assetId
+ * @param {String} amount
+ */
 function addAssetQuantity (accountId, assetId, amount) {
   debug('starting addAssetQuantity...')
+
+  let txClient, txHash
 
   return new Promise((resolve, reject) => {
     const tx = txBuilder
@@ -312,12 +333,13 @@ function addAssetQuantity (accountId, assetId, amount) {
       .createdTime(Date.now())
       .addAssetQuantity(accountId, assetId, amount)
       .build()
-    const txClient = new endpointGrpc.CommandServiceClient(
+    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+
+    txClient = new endpointGrpc.CommandServiceClient(
       storage.nodeIp,
       grpc.credentials.createInsecure()
     )
-    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
-    const txHash = blob2array(tx.hash().blob())
+    txHash = blob2array(tx.hash().blob())
 
     debug('submitting transaction...')
     debug('peer ip:', storage.nodeIp)
@@ -369,8 +391,18 @@ function addAssetQuantity (accountId, assetId, amount) {
     })
 }
 
+/**
+ * transferAsset https://hyperledger.github.io/iroha-api/#transfer-asset
+ * @param {String} srcAccountId
+ * @param {String} destAccountId
+ * @param {String} assetId
+ * @param {String} description
+ * @param {String} amount
+ */
 function transferAsset (srcAccountId, destAccountId, assetId, description, amount) {
   debug('starting transferAsset...')
+
+  let txClient, txHash
 
   return new Promise((resolve, reject) => {
     const tx = txBuilder
@@ -379,12 +411,13 @@ function transferAsset (srcAccountId, destAccountId, assetId, description, amoun
       .createdTime(Date.now())
       .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
       .build()
-    const txClient = new endpointGrpc.CommandServiceClient(
+    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+
+    txClient = new endpointGrpc.CommandServiceClient(
       storage.nodeIp,
       grpc.credentials.createInsecure()
     )
-    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
-    const txHash = blob2array(tx.hash().blob())
+    txHash = blob2array(tx.hash().blob())
 
     debug('submitting transaction...')
     debug('peer ip:', storage.nodeIp)
@@ -503,7 +536,6 @@ function makeProtoTxWithKeys (builtTx, keys) {
 export default {
   login,
   logout,
-  getAccount,
   getAccountAssets,
   getAccountAssetTransactions
 }

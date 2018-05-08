@@ -1,13 +1,83 @@
 import irohaUtil from '../../../src/util/iroha-util'
 
 describe('iroha-util', () => {
-  it('#login should fail with invalid parameters', done => {
-    const username = 'a@a'
-    const privateKey = '0d828447cc2e4b3682ed5897b615b36d0d828447cc2e4b3682ed5897b615b36a'
-    const nodeIp = 'localhost:50051'
+  const ADMIN_ACCOUNT_ID = 'admin@test'
+  const ADMIN_PRIVATE_KEY = '1d7e0a32ee0affeb4d22acd73c2c6fb6bd58e266c8c2ce4fa0ffe3dd6a253ffb'
+  const NODE_IP = 'localhost:50051'
+  const EXISTING_ASSET = 'coolcoin#test'
+  const NONEXISTING_ASSET = 'notexist#test'
 
-    irohaUtil.login(username, privateKey, nodeIp)
-      .then(account => done('login should not succeed'))
-      .catch(() => done())
+  function logout () {
+    return irohaUtil.logout()
+  }
+
+  describe('#login', () => {
+    after(logout)
+
+    it('should fail if privateKey.length != 64', done => {
+      irohaUtil.login('admin@test', '', NODE_IP)
+        .then(() => done(new Error('login should fail')))
+        .catch(() => done())
+    })
+
+    it('should fail with invalid parameters', done => {
+      irohaUtil.login('notexist@test', '0d828447cc2e4b3682ed5897b615b36d0d828447cc2e4b3682ed5897b615b36a', NODE_IP)
+        .then(() => done(new Error('login should fail')))
+        .catch(() => done())
+    })
+
+    it('should succeed with valid parameters', done => {
+      irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
+        .then(() => done())
+        .catch(err => done(err))
+    })
+  })
+
+  describe('#getAccountAssets', () => {
+    afterEach(logout)
+
+    it('should fail before login', done => {
+      irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID, 'coolcoin#test')
+        .then(() => done(new Error('query should fail')))
+        .catch(() => done())
+    })
+
+    it('should succeed after login', done => {
+      irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
+        .then(() => irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID, EXISTING_ASSET))
+        .then(() => done())
+        .catch(err => done(err))
+    })
+
+    it('should fail to get nonexisting asset', done => {
+      irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
+        .then(() => irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID, NONEXISTING_ASSET))
+        .then(() => done())
+        .catch(err => done(err))
+    })
+  })
+
+  describe('#getAccountAssetTransactions', () => {
+    afterEach(logout)
+
+    it('should fail before login', done => {
+      irohaUtil.getAccountAssetTransactions(ADMIN_ACCOUNT_ID, EXISTING_ASSET)
+        .then(() => done(new Error('query should fail')))
+        .catch(() => done())
+    })
+
+    it('should succeed after login', done => {
+      irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
+        .then(() => irohaUtil.getAccountAssetTransactions(ADMIN_ACCOUNT_ID, EXISTING_ASSET))
+        .then(() => done())
+        .catch(err => done(err))
+    })
+
+    it('should fail to get nonexisting asset\'s transactions', done => {
+      irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
+        .then(() => irohaUtil.getAccountAssetTransactions(ADMIN_ACCOUNT_ID, NONEXISTING_ASSET))
+        .then(() => done())
+        .catch(err => done(err))
+    })
   })
 })
