@@ -97,8 +97,7 @@
                 this.$router.push('/dashboard/summary-page')
               })
               .catch(err => {
-                // TODO: show the error
-                console.error(err)
+                alert(err)
               })
           } else {
             return false
