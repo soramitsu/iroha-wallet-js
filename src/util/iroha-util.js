@@ -104,6 +104,7 @@ function sendQuery (
     // invalid node IP is set. To avoid this problem, we use timeout timer.
     // c.f. https://github.com/grpc/grpc/issues/13163
     const timer = setTimeout(() => {
+      queryClient.$channel.close()
       reject(new Error('request timed out'))
     }, timeoutLimit)
 
