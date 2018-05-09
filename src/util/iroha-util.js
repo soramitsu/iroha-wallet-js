@@ -18,6 +18,15 @@ const cache = {
   nodeIp: null // persisted by localStorage
 }
 
+/**
+ * mock localStorage for testing environment
+ */
+const localStorage = global.localStorage || {
+  setItem () {},
+  getItem () {},
+  removeItem () {}
+}
+
 const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
 const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
 const pbResponse = require('iroha-lib/pb/responses_pb.js')
@@ -126,6 +135,8 @@ function sendQuery (
     }, timeoutLimit)
 
     queryClient.find(protoQuery, (err, response) => {
+      clearTimeout(timer)
+
       if (err) {
         return reject(err)
       }
