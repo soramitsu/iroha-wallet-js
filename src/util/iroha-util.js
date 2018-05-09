@@ -1,13 +1,12 @@
 /* eslint-disable no-unused-vars */
-/**
- * # how to run
- * ```
- * DEBUG=iroha-util node path/to/index.js
- * ```
- */
 const debug = require('debug')('iroha-util')
 const iroha = require('iroha-lib')
 const grpc = require('grpc')
+
+/**
+ * default timeout limit of queries
+ */
+const DEFAULT_TIMEOUT_LIMIT = 5000
 
 const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
 const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
@@ -107,10 +106,12 @@ function logout () {
  * wrapper function of queries
  * @param {Function} buildQuery
  * @param {Function} onResponse
+ * @param {Number} timeoutLimit timeoutLimit
  */
 function sendQuery (
   buildQuery = function () {},
-  onResponse = function (resolve, reject, responseName, response) {}
+  onResponse = function (resolve, reject, responseName, response) {},
+  timeoutLimit = DEFAULT_TIMEOUT_LIMIT
 ) {
   return new Promise((resolve, reject) => {
     const queryClient = new endpointGrpc.QueryServiceClient(
@@ -124,6 +125,13 @@ function sendQuery (
     debug('peer ip:', storage.nodeIp)
     debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
     debug('')
+
+    // grpc-node hangs against unresponsive server, which possibly occur when
+    // invalid node IP is set. To avoid this problem, we use timeout timer.
+    // c.f. https://github.com/grpc/grpc/issues/13163
+    const timer = setTimeout(() => {
+      reject(new Error('request timed out'))
+    }, timeoutLimit)
 
     queryClient.find(protoQuery, (err, response) => {
       if (err) {
