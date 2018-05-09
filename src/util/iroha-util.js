@@ -26,32 +26,6 @@ const storage = {
   nodeIp: null
 }
 
-// if this file is directly run
-if (require.main === module) {
-  /*
-  * user inputs
-  */
-  const username = 'admin@test'
-  const privateKey = '1d7e0a32ee0affeb4d22acd73c2c6fb6bd58e266c8c2ce4fa0ffe3dd6a253ffb'
-  // const nodeIp = '51.15.244.195:50051'
-  const nodeIp = 'localhost:50051'
-
-  /*
-  login(username, privateKey, nodeIp)
-    .then(() => createAsset('coolcoin', 'test', 2))
-    .then(() => createAsset('supercoin', 'test', 5))
-    .then(() => addAssetQuantity(storage.username, 'coolcoin#test', '200.50'))
-  */
-
-  login(username, privateKey, nodeIp)
-    .then(() => getAccountAssets(storage.username, 'coolcoin#test'))
-    .then(() => transferAsset(storage.username, 'test@test', 'coolcoin#test', 'hello world', '1.00'))
-    .then(() => getAccountAssets(storage.username, 'coolcoin#test'))
-    .then(() => getAccountAssets('test@test', 'coolcoin#test'))
-    .then(() => getAccountAssetTransactions('test@test', 'coolcoin#test'))
-    .catch(err => console.error(err))
-}
-
 /*
  * ===== functions =====
  */
