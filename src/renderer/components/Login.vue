@@ -68,7 +68,7 @@
         form: {
           username: '',
           privateKey: '',
-          nodeIp: ''
+          nodeIp: irohaUtil.getStoredNodeIp()
         },
         rules: {
           username: [

@@ -8,6 +8,16 @@ const grpc = require('grpc')
  */
 const DEFAULT_TIMEOUT_LIMIT = 5000
 
+/**
+ * cached items available from start to end of the app
+ * plus, `nodeIp` is persisted by localStorage
+ */
+const cache = {
+  username: null, // NOT persisted by localStorage
+  keys: null, // NOT persisted by localStorage
+  nodeIp: null // persisted by localStorage
+}
+
 const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
 const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
 const pbResponse = require('iroha-lib/pb/responses_pb.js')
@@ -16,15 +26,6 @@ const queryBuilder = new iroha.ModelQueryBuilder()
 const protoTxHelper = new iroha.ModelProtoTransaction()
 const protoQueryHelper = new iroha.ModelProtoQuery()
 const crypto = new iroha.ModelCrypto()
-
-/*
- * storage
- */
-const storage = {
-  username: null,
-  keys: null,
-  nodeIp: null
-}
 
 /*
  * ===== functions =====
@@ -47,9 +48,11 @@ function login (username, privateKey, nodeIp) {
     privateKey
   )
 
-  storage.username = username
-  storage.keys = keys
-  storage.nodeIp = nodeIp
+  cache.username = username
+  cache.keys = keys
+  cache.nodeIp = nodeIp
+
+  localStorage.setItem('iroha-wallet:nodeIp', nodeIp)
 
   return getAccount(username)
     .then(account => {
@@ -66,11 +69,25 @@ function login (username, privateKey, nodeIp) {
  * clear local cache
  */
 function logout () {
-  storage.username = null
-  storage.keys = null
-  storage.nodeIp = null
+  cache.username = null
+  cache.keys = null
+  cache.nodeIp = null
 
   return Promise.resolve()
+}
+
+/**
+ * return node IP which was used before
+ */
+function getStoredNodeIp () {
+  return localStorage.getItem('iroha-wallet:nodeIp') || ''
+}
+
+/**
+ * clear localStorage
+ */
+function clearStorage () {
+  localStorage.removeItem('iroha-wallet:nodeIp')
 }
 
 /*
@@ -89,14 +106,14 @@ function sendQuery (
 ) {
   return new Promise((resolve, reject) => {
     const queryClient = new endpointGrpc.QueryServiceClient(
-      storage.nodeIp,
+      cache.nodeIp,
       grpc.credentials.createInsecure()
     )
     const query = buildQuery()
-    const protoQuery = makeProtoQueryWithKeys(query, storage.keys)
+    const protoQuery = makeProtoQueryWithKeys(query, cache.keys)
 
     debug('submitting query...')
-    debug('peer ip:', storage.nodeIp)
+    debug('peer ip:', cache.nodeIp)
     debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
     debug('')
 
@@ -137,7 +154,7 @@ function getAccount (accountId) {
   return sendQuery(
     () => {
       return queryBuilder
-        .creatorAccountId(storage.username)
+        .creatorAccountId(cache.username)
         .createdTime(Date.now())
         .queryCounter(1)
         .getAccount(accountId)
@@ -168,7 +185,7 @@ function getAccountAssetTransactions (accountId, assetId) {
   return sendQuery(
     () => {
       return queryBuilder
-        .creatorAccountId(storage.username)
+        .creatorAccountId(cache.username)
         .createdTime(Date.now())
         .queryCounter(1)
         .getAccountAssetTransactions(accountId, assetId)
@@ -199,7 +216,7 @@ function getAccountAssets (accountId, assetId) {
   return sendQuery(
     () => {
       return queryBuilder
-        .creatorAccountId(storage.username)
+        .creatorAccountId(cache.username)
         .createdTime(Date.now())
         .queryCounter(1)
         .getAccountAssets(accountId, assetId)
@@ -222,10 +239,11 @@ function getAccountAssets (accountId, assetId) {
 /*
  * ===== commands =====
  */
+// TODO: refactor commands (e.g. make common parts together, etc.)
 /**
  * createAsset https://hyperledger.github.io/iroha-api/#create-asset
  * @param {String} assetName
- * @param {String} domainId
+ * @param {String} domainI
  * @param {Number} precision
  */
 function createAsset (assetName, domainId, precision) {
@@ -235,21 +253,21 @@ function createAsset (assetName, domainId, precision) {
 
   return new Promise((resolve, reject) => {
     const tx = txBuilder
-      .creatorAccountId(storage.username)
+      .creatorAccountId(cache.username)
       .txCounter(1)
       .createdTime(Date.now())
       .createAsset(assetName, domainId, precision)
       .build()
-    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
 
     txClient = new endpointGrpc.CommandServiceClient(
-      storage.nodeIp,
+      cache.nodeIp,
       grpc.credentials.createInsecure()
     )
     txHash = blob2array(tx.hash().blob())
 
     debug('submitting transaction...')
-    debug('peer ip:', storage.nodeIp)
+    debug('peer ip:', cache.nodeIp)
     debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
     debug('txhash:', Buffer.from(txHash).toString('hex'))
     debug('')
@@ -311,21 +329,21 @@ function addAssetQuantity (accountId, assetId, amount) {
 
   return new Promise((resolve, reject) => {
     const tx = txBuilder
-      .creatorAccountId(storage.username)
+      .creatorAccountId(cache.username)
       .txCounter(1)
       .createdTime(Date.now())
       .addAssetQuantity(accountId, assetId, amount)
       .build()
-    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
 
     txClient = new endpointGrpc.CommandServiceClient(
-      storage.nodeIp,
+      cache.nodeIp,
       grpc.credentials.createInsecure()
     )
     txHash = blob2array(tx.hash().blob())
 
     debug('submitting transaction...')
-    debug('peer ip:', storage.nodeIp)
+    debug('peer ip:', cache.nodeIp)
     debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
     debug('txhash:', Buffer.from(txHash).toString('hex'))
     debug('')
@@ -389,21 +407,21 @@ function transferAsset (srcAccountId, destAccountId, assetId, description, amoun
 
   return new Promise((resolve, reject) => {
     const tx = txBuilder
-      .creatorAccountId(storage.username)
+      .creatorAccountId(cache.username)
       .txCounter(1)
       .createdTime(Date.now())
       .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
       .build()
-    const protoTx = makeProtoTxWithKeys(tx, storage.keys)
+    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
 
     txClient = new endpointGrpc.CommandServiceClient(
-      storage.nodeIp,
+      cache.nodeIp,
       grpc.credentials.createInsecure()
     )
     txHash = blob2array(tx.hash().blob())
 
     debug('submitting transaction...')
-    debug('peer ip:', storage.nodeIp)
+    debug('peer ip:', cache.nodeIp)
     debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
     debug('txhash:', Buffer.from(txHash).toString('hex'))
     debug('')
@@ -520,5 +538,7 @@ export default {
   login,
   logout,
   getAccountAssets,
-  getAccountAssetTransactions
+  getAccountAssetTransactions,
+  getStoredNodeIp,
+  clearStorage
 }
