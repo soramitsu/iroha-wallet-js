@@ -22,8 +22,14 @@ describe('iroha-util', () => {
         .catch(() => done())
     })
 
-    it('should fail with invalid parameters', done => {
+    it('should fail if account ID does not exist', done => {
       irohaUtil.login('notexist@test', '0d828447cc2e4b3682ed5897b615b36d0d828447cc2e4b3682ed5897b615b36a', NODE_IP)
+        .then(() => done(new Error('login should fail')))
+        .catch(() => done())
+    })
+
+    it('should fail if invalid node IP is set', done => {
+      irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, String(Math.random()))
         .then(() => done(new Error('login should fail')))
         .catch(() => done())
     })
