@@ -36,12 +36,6 @@ const protoTxHelper = new iroha.ModelProtoTransaction()
 const protoQueryHelper = new iroha.ModelProtoQuery()
 const crypto = new iroha.ModelCrypto()
 
-login('admin@test', '1d7e0a32ee0affeb4d22acd73c2c6fb6bd58e266c8c2ce4fa0ffe3dd6a253ffb', '51.15.244.195:50051')
-  .then(() => createAccount('alice', 'test', crypto.fromPrivateKey('9c430dfe8c54b0a447e25f75121119ac3b649c1253bce8420f245e4c104dccd1').publicKey()))
-  .then(() => transferAsset('admin@test', 'alice@test', 'coolcoin#test', '', '100.00'))
-  .then(() => console.log('done!'))
-  .catch(err => console.error(err))
-
 /*
  * ===== functions =====
  */
@@ -286,25 +280,19 @@ function getAccountAssets (accountId, assetId) {
 /*
  * ===== commands =====
  */
-// TODO: refactor commands (e.g. make common parts together, etc.)
 /**
- * createAccount https://hyperledger.github.io/iroha-api/?protobuf#create-account
- * @param {String} accountName
- * @param {String} domainId
- * @param {String} mainPubKey
+ * wrapper function of commands
+ * @param {Function} buildQuery
+ * @param {Number} timeoutLimit timeoutLimit
  */
-function createAccount (accountName, domainId, mainPubKey) {
-  debug('starting createAccount...')
-
+function command (
+  buildTx = function () {},
+  timeoutLimit = DEFAULT_TIMEOUT_LIMIT
+) {
   let txClient, txHash
 
   return new Promise((resolve, reject) => {
-    const tx = txBuilder
-      .creatorAccountId(cache.username)
-      .txCounter(1)
-      .createdTime(Date.now())
-      .createAccount(accountName, domainId, mainPubKey)
-      .build()
+    const tx = buildTx()
     const protoTx = makeProtoTxWithKeys(tx, cache.keys)
 
     txClient = new endpointGrpc.CommandServiceClient(
@@ -319,7 +307,14 @@ function createAccount (accountName, domainId, mainPubKey) {
     debug('txhash:', Buffer.from(txHash).toString('hex'))
     debug('')
 
+    const timer = setTimeout(() => {
+      txClient.$channel.close()
+      reject(new Error('please check IP address OR your internet connection'))
+    }, timeoutLimit)
+
     txClient.torii(protoTx, (err, data) => {
+      clearTimeout(timer)
+
       if (err) {
         return reject(err)
       }
@@ -361,6 +356,27 @@ function createAccount (accountName, domainId, mainPubKey) {
         })
       })
     })
+}
+
+/**
+ * createAccount https://hyperledger.github.io/iroha-api/?protobuf#create-account
+ * @param {String} accountName
+ * @param {String} domainId
+ * @param {String} mainPubKey
+ */
+function createAccount (accountName, domainId, mainPubKey) {
+  debug('starting createAccount...')
+
+  return command(
+    function buildTx () {
+      return txBuilder
+        .creatorAccountId(cache.username)
+        .txCounter(1)
+        .createdTime(Date.now())
+        .createAccount(accountName, domainId, mainPubKey)
+        .build()
+    }
+  )
 }
 
 /**
@@ -372,71 +388,16 @@ function createAccount (accountName, domainId, mainPubKey) {
 function createAsset (assetName, domainId, precision) {
   debug('starting createAsset...')
 
-  let txClient, txHash
-
-  return new Promise((resolve, reject) => {
-    const tx = txBuilder
-      .creatorAccountId(cache.username)
-      .txCounter(1)
-      .createdTime(Date.now())
-      .createAsset(assetName, domainId, precision)
-      .build()
-    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
-
-    txClient = new endpointGrpc.CommandServiceClient(
-      cache.nodeIp,
-      grpc.credentials.createInsecure()
-    )
-    txHash = blob2array(tx.hash().blob())
-
-    debug('submitting transaction...')
-    debug('peer ip:', cache.nodeIp)
-    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
-    debug('txhash:', Buffer.from(txHash).toString('hex'))
-    debug('')
-
-    txClient.torii(protoTx, (err, data) => {
-      if (err) {
-        return reject(err)
-      }
-
-      debug('submitted transaction successfully!')
-      resolve()
-    })
-  })
-    .then(() => {
-      debug('sleep 5 seconds...')
-      return sleep(5000)
-    })
-    .then(() => {
-      debug('sending transaction status request...')
-
-      return new Promise((resolve, reject) => {
-        const request = new pbEndpoint.TxStatusRequest()
-
-        request.setTxHash(txHash)
-
-        txClient.status(request, (err, response) => {
-          if (err) {
-            return reject(err)
-          }
-
-          const status = response.getTxStatus()
-          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
-          const statusName = getProtoEnumName(
-            TxStatus,
-            'iroha.protocol.TxStatus',
-            status
-          )
-
-          if (statusName !== 'COMMITTED') {
-            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
-          }
-
-          resolve()
-        })
-      })
-    })
+  return command(
+    function buildTx () {
+      return txBuilder
+        .creatorAccountId(cache.username)
+        .txCounter(1)
+        .createdTime(Date.now())
+        .createAsset(assetName, domainId, precision)
+        .build()
+    }
+  )
 }
 
 /**
@@ -448,71 +409,16 @@ function createAsset (assetName, domainId, precision) {
 function addAssetQuantity (accountId, assetId, amount) {
   debug('starting addAssetQuantity...')
 
-  let txClient, txHash
-
-  return new Promise((resolve, reject) => {
-    const tx = txBuilder
-      .creatorAccountId(cache.username)
-      .txCounter(1)
-      .createdTime(Date.now())
-      .addAssetQuantity(accountId, assetId, amount)
-      .build()
-    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
-
-    txClient = new endpointGrpc.CommandServiceClient(
-      cache.nodeIp,
-      grpc.credentials.createInsecure()
-    )
-    txHash = blob2array(tx.hash().blob())
-
-    debug('submitting transaction...')
-    debug('peer ip:', cache.nodeIp)
-    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
-    debug('txhash:', Buffer.from(txHash).toString('hex'))
-    debug('')
-
-    txClient.torii(protoTx, (err, data) => {
-      if (err) {
-        return reject(err)
-      }
-
-      debug('submitted transaction successfully!')
-      resolve()
-    })
-  })
-    .then(() => {
-      debug('sleep 5 seconds...')
-      return sleep(5000)
-    })
-    .then(() => {
-      debug('sending transaction status request...')
-
-      return new Promise((resolve, reject) => {
-        const request = new pbEndpoint.TxStatusRequest()
-
-        request.setTxHash(txHash)
-
-        txClient.status(request, (err, response) => {
-          if (err) {
-            return reject(err)
-          }
-
-          const status = response.getTxStatus()
-          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
-          const statusName = getProtoEnumName(
-            TxStatus,
-            'iroha.protocol.TxStatus',
-            status
-          )
-
-          if (statusName !== 'COMMITTED') {
-            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
-          }
-
-          resolve()
-        })
-      })
-    })
+  return command(
+    function buildTx () {
+      return txBuilder
+        .creatorAccountId(cache.username)
+        .txCounter(1)
+        .createdTime(Date.now())
+        .addAssetQuantity(accountId, assetId, amount)
+        .build()
+    }
+  )
 }
 
 /**
@@ -526,71 +432,16 @@ function addAssetQuantity (accountId, assetId, amount) {
 function transferAsset (srcAccountId, destAccountId, assetId, description, amount) {
   debug('starting transferAsset...')
 
-  let txClient, txHash
-
-  return new Promise((resolve, reject) => {
-    const tx = txBuilder
-      .creatorAccountId(cache.username)
-      .txCounter(1)
-      .createdTime(Date.now())
-      .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
-      .build()
-    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
-
-    txClient = new endpointGrpc.CommandServiceClient(
-      cache.nodeIp,
-      grpc.credentials.createInsecure()
-    )
-    txHash = blob2array(tx.hash().blob())
-
-    debug('submitting transaction...')
-    debug('peer ip:', cache.nodeIp)
-    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
-    debug('txhash:', Buffer.from(txHash).toString('hex'))
-    debug('')
-
-    txClient.torii(protoTx, (err, data) => {
-      if (err) {
-        return reject(err)
-      }
-
-      debug('submitted transaction successfully!')
-      resolve()
-    })
-  })
-    .then(() => {
-      debug('sleep 5 seconds...')
-      return sleep(5000)
-    })
-    .then(() => {
-      debug('sending transaction status request...')
-
-      return new Promise((resolve, reject) => {
-        const request = new pbEndpoint.TxStatusRequest()
-
-        request.setTxHash(txHash)
-
-        txClient.status(request, (err, response) => {
-          if (err) {
-            return reject(err)
-          }
-
-          const status = response.getTxStatus()
-          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
-          const statusName = getProtoEnumName(
-            TxStatus,
-            'iroha.protocol.TxStatus',
-            status
-          )
-
-          if (statusName !== 'COMMITTED') {
-            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
-          }
-
-          resolve()
-        })
-      })
-    })
+  return command(
+    function () {
+      return txBuilder
+        .creatorAccountId(cache.username)
+        .txCounter(1)
+        .createdTime(Date.now())
+        .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
+        .build()
+    }
+  )
 }
 
 /*
