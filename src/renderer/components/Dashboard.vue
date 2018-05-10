@@ -30,14 +30,12 @@
 </template>
 
 <script>
-  import irohaUtil from 'util/iroha-util'
-
   export default {
     name: 'dashboard',
 
     methods: {
       logout () {
-        irohaUtil.logout()
+        this.$store.dispatch('logout')
           .then(() => this.$router.push('/login'))
       }
     }

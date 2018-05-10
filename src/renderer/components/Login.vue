@@ -57,8 +57,6 @@
 </template>
 
 <script>
-  import irohaUtil from 'util/iroha-util'
-
   export default {
     name: 'login',
 
@@ -68,7 +66,7 @@
         form: {
           username: '',
           privateKey: '',
-          nodeIp: irohaUtil.getStoredNodeIp()
+          nodeIp: this.$store.state.Login.nodeIp
         },
         rules: {
           username: [
@@ -104,13 +102,12 @@
           if (valid) {
             this.isLoading = true
 
-            irohaUtil.login(
-              this.form.username,
-              this.form.privateKey,
-              this.form.nodeIp
-            )
+            this.$store.dispatch('login', {
+              username: this.form.username,
+              privateKey: this.form.privateKey,
+              nodeIp: this.form.nodeIp
+            })
               .then(account => {
-                this.$store.commit('SET_USERNAME', account.accountId)
                 this.$router.push('/dashboard/summary-page')
               })
               .catch(err => {
