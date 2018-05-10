@@ -22,14 +22,14 @@
 
     <el-row class="summary-page__row">
       <el-card>
-        <transactions :transactions="accountTransactions" currency />
+        <transactions :transactions="transactions" currency />
       </el-card>
     </el-row>
   </div>
 </template>
 
 <script>
-  import { mapState } from 'vuex'
+  import { mapState, mapGetters } from 'vuex'
   import Transactions from '@/components/Transactions'
 
   export default {
@@ -50,16 +50,13 @@
     },
 
     computed: {
-      accountTransactions () {
-        // TODO: pick only transfer transactions
-        return this.$store.state.Login.accountTransactions.map(t => {
-          return t
-        })
-      },
-
       ...mapState({
         accountId: state => state.Login.accountId,
         accountInfo: state => state.Login.accountInfo
+      }),
+
+      ...mapGetters({
+        transactions: 'transfers'
       })
     },
 
