@@ -16,7 +16,43 @@ const state = {
   accountId: '',
   nodeIp: irohaUtil.getStoredNodeIp(),
   accountInfo: {},
-  accountTransactions: []
+  transactions: []
+}
+
+const getters = {
+  transfers (state) {
+    const transfers = []
+
+    state.transactions.forEach(t => {
+      const { commandsList, createdTime } = t.payload
+
+      commandsList.forEach(c => {
+        if (!c.transferAsset) return
+
+        const {
+          amount,
+          assetId,
+          destAccountId,
+          srcAccountId
+        } = c.transferAsset
+
+        // TODO: use values from 'first' to 'fourth'
+        // modify '12345' to '123.45'
+        const valueWithPrecision = String(amount.value.fourth)
+          .replace(RegExp(`(\\d{${amount.precision}})$`), '.$1')
+
+        transfers.push({
+          from: srcAccountId,
+          to: destAccountId,
+          amount: valueWithPrecision,
+          currency: assetId,
+          date: createdTime
+        })
+      })
+    })
+
+    return transfers
+  }
 }
 
 const mutations = {
@@ -38,7 +74,7 @@ const mutations = {
   [types.GET_ACCOUNT_TRANSACTIONS_REQUEST] (state) {},
 
   [types.GET_ACCOUNT_TRANSACTIONS_SUCCESS] (state, transactions) {
-    state.accountTransactions = transactions
+    state.transactions = transactions
   },
 
   [types.GET_ACCOUNT_TRANSACTIONS_FAILURE] (state, err) {}
@@ -81,6 +117,7 @@ const actions = {
 
 export default {
   state,
+  getters,
   mutations,
   actions
 }
