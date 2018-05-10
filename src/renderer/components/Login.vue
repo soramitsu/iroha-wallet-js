@@ -110,6 +110,7 @@
               this.form.nodeIp
             )
               .then(account => {
+                this.$store.commit('SET_USERNAME', account.accountId)
                 this.$router.push('/dashboard/summary-page')
               })
               .catch(err => {

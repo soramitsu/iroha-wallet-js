@@ -3,7 +3,7 @@
     <el-row class="summary-page__row" type="flex" :gutter="15">
       <el-col :span="12">
         <el-card class="user-card">
-          <div class="user-card__account-id">accountname@domain</div>
+          <div class="user-card__account-id">{{ username }}</div>
 
           <div v-for="(value, key) in user.info" :key="key">
             {{ key }}: {{ value }}
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
   import Transactions from '@/components/Transactions'
 
   export default {
@@ -62,6 +63,12 @@
           { id: '1', from: 'roma@russia', to: 'you', amount: '100.00', currency: 'dollar#russia', date: '11.04.2017' }
         ]
       }
+    },
+
+    computed: {
+      ...mapGetters({
+        username: 'username'
+      })
     }
   }
 </script>
