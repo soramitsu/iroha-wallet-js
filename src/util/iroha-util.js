@@ -186,6 +186,36 @@ function getAccount (accountId) {
 }
 
 /**
+ * getAccountTransactions https://hyperledger.github.io/iroha-api/#get-account-transactions
+ * @param {String} accountId
+ */
+function getAccountTransactions (accountId) {
+  debug('starting getAccountTransactions...')
+
+  return sendQuery(
+    () => {
+      return queryBuilder
+        .creatorAccountId(cache.username)
+        .createdTime(Date.now())
+        .queryCounter(1)
+        .getAccountTransactions(accountId)
+        .build()
+    },
+    (resolve, reject, responseName, response) => {
+      if (responseName !== 'TRANSACTIONS_RESPONSE') {
+        return reject(new Error(`Query response error: expected=TRANSACTIONS_RESPONSE, actual=${responseName}`))
+      }
+
+      const transactions = response.getTransactionsResponse().toObject().transactionsList
+
+      debug('transactions', transactions)
+
+      resolve(transactions)
+    }
+  )
+}
+
+/**
  * getAccountAssetTransactions https://hyperledger.github.io/iroha-api/#get-account-asset-transactions
  * @param {String} accountId
  * @param {String} assetId
@@ -550,6 +580,7 @@ export default {
   logout,
   getAccountAssets,
   getAccountAssetTransactions,
+  getAccountTransactions,
   getStoredNodeIp,
   clearStorage
 }
