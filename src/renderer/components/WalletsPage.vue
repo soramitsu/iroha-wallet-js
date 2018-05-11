@@ -19,17 +19,15 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
+
   export default {
     name: 'wallets-page',
 
-    data () {
-      return {
-        wallets: [
-          { id: 'wallet-1', name: 'dollar#russia', amount: '100.00' },
-          { id: 'wallet-2', name: 'yen#russia', amount: '100.00' },
-          { id: 'wallet-3', name: 'euro#russia', amount: '100.00' }
-        ]
-      }
+    computed: {
+      ...mapGetters({
+        wallets: 'wallets'
+      })
     },
 
     watch: {

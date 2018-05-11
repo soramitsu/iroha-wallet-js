@@ -73,10 +73,15 @@ const getters = {
   wallets (state) {
     return state.assets.map(a => {
       return {
+        id: a.accountAsset.assetId.replace(/#/g, '$'),
         name: a.accountAsset.assetId,
         amount: amountToString(a.accountAsset.balance)
       }
     })
+  },
+
+  getTransfersByWalletId: (state) => (walletId) => {
+    return getters.transfers(state).filter(t => t.currency.replace(/#/g, '$') === walletId)
   }
 }
 

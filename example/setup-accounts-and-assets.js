@@ -20,6 +20,20 @@ irohaUtil.login('admin@test', adminPrivKeyHex, nodeIp)
   .then(() => irohaUtil.addAssetQuantity('admin@test', 'hotcoin#test', '99999.99999'))
   .then(() => irohaUtil.transferAsset('admin@test', 'alice@test', 'coolcoin#test', 'hi', '0.50'))
   .then(() => irohaUtil.transferAsset('admin@test', 'alice@test', 'hotcoin#test', 'hi', '0.50000'))
+  .then(() => {
+    const gettingAccountAssets = ['coolcoin#test', 'hotcoin#test'].map(assetId => {
+      return irohaUtil.getAccountAssets('admin@test', assetId)
+    })
+
+    return Promise.all(gettingAccountAssets)
+  })
+  .then(() => {
+    const gettingAccountAssetsTransactions = ['coolcoin#test', 'hotcoin#test'].map(assetId => {
+      return irohaUtil.getAccountAssetTransactions('admin@test', assetId)
+    })
+
+    return Promise.all(gettingAccountAssetsTransactions)
+  })
   .catch(err => console.error(err))
 
 function tryToCreateAccount (accountName, domainId, publicKey) {
