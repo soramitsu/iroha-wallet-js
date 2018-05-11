@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import irohaUtil from 'util/iroha-util'
 
 const types = {
@@ -40,6 +41,7 @@ const getters = {
         // modify '12345' to '123.45'
         const valueWithPrecision = String(amount.value.fourth)
           .replace(RegExp(`(\\d{${amount.precision}})$`), '.$1')
+          .replace(/^\./, '0.')
 
         transfers.push({
           from: srcAccountId,
@@ -106,8 +108,16 @@ const actions = {
   getAccountTransactions ({ commit }) {
     commit(types.GET_ACCOUNT_TRANSACTIONS_REQUEST)
 
-    return irohaUtil.getAccountTransactions(state.accountId)
-      .then(res => commit(types.GET_ACCOUNT_TRANSACTIONS_SUCCESS, res))
+    // TODO: get assetIds via API in the future
+    const assetIds = ['coolcoin#test', 'hotcoin#test']
+    const gettingAccountAssetsTransactions = assetIds.map(assetId => {
+      return irohaUtil.getAccountAssetTransactions(state.accountId, assetId)
+    })
+
+    return Promise.all(gettingAccountAssetsTransactions)
+      .then(responses => {
+        commit(types.GET_ACCOUNT_TRANSACTIONS_SUCCESS, _.flatten(responses))
+      })
       .catch(err => {
         commit(types.GET_ACCOUNT_TRANSACTIONS_FAILURE, err)
         throw err

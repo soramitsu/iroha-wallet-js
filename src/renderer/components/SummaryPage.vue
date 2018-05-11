@@ -51,8 +51,8 @@
 
     computed: {
       ...mapState({
-        accountId: state => state.Login.accountId,
-        accountInfo: state => state.Login.accountInfo
+        accountId: state => state.Account.accountId,
+        accountInfo: state => state.Account.accountInfo
       }),
 
       ...mapGetters({

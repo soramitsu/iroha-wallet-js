@@ -66,7 +66,7 @@
         form: {
           username: '',
           privateKey: '',
-          nodeIp: this.$store.state.Login.nodeIp
+          nodeIp: this.$store.state.Account.nodeIp
         },
         rules: {
           username: [
