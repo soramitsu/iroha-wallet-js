@@ -1,4 +1,7 @@
 /* eslint-disable no-unused-vars */
+/*
+ * DEBUG=iroha-util babel-node --presets env example/setup-accounts-and-assets.js
+ */
 import fs from 'fs'
 import path from 'path'
 import iroha from 'iroha-lib'
