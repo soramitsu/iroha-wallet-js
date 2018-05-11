@@ -10,14 +10,28 @@ const types = {
   LOGOUT_FAILURE: 'LOGOUT_FAILURE',
   GET_ACCOUNT_TRANSACTIONS_REQUEST: 'GET_ACCOUNT_TRANSACTIONS_REQUEST',
   GET_ACCOUNT_TRANSACTIONS_SUCCESS: 'GET_ACCOUNT_TRANSACTIONS_SUCCESS',
-  GET_ACCOUNT_TRANSACTIONS_FAILURE: 'GET_ACCOUNT_TRANSACTIONS_FAILURE'
+  GET_ACCOUNT_TRANSACTIONS_FAILURE: 'GET_ACCOUNT_TRANSACTIONS_FAILURE',
+  GET_ACCOUNT_ASSETS_REQUEST: 'GET_ACCOUNT_ASSETS_REQUEST',
+  GET_ACCOUNT_ASSETS_SUCCESS: 'GET_ACCOUNT_ASSETS_SUCCESS',
+  GET_ACCOUNT_ASSETS_FAILURE: 'GET_ACCOUNT_ASSETS_FAILURE'
 }
 
 const state = {
   accountId: '',
   nodeIp: irohaUtil.getStoredNodeIp(),
   accountInfo: {},
-  transactions: []
+  transactions: [],
+  assets: []
+}
+
+/*
+ * modify an amount object to a string like '123.45'
+ **/
+function amountToString ({ value, precision }) {
+  // TODO: use all values from 'first' to 'fourth'
+  return String(value.fourth)
+    .replace(RegExp(`(\\d{${precision}})$`), '.$1')
+    .replace(/^\./, '0.')
 }
 
 const getters = {
@@ -37,16 +51,10 @@ const getters = {
           srcAccountId
         } = c.transferAsset
 
-        // TODO: use values from 'first' to 'fourth'
-        // modify '12345' to '123.45'
-        const valueWithPrecision = String(amount.value.fourth)
-          .replace(RegExp(`(\\d{${amount.precision}})$`), '.$1')
-          .replace(/^\./, '0.')
-
         transfers.push({
           from: srcAccountId,
           to: destAccountId,
-          amount: valueWithPrecision,
+          amount: amountToString(amount),
           currency: assetId,
           date: createdTime
         })
@@ -54,6 +62,15 @@ const getters = {
     })
 
     return transfers
+  },
+
+  wallets (state) {
+    return state.assets.map(a => {
+      return {
+        name: a.accountAsset.assetId,
+        amount: amountToString(a.accountAsset.balance)
+      }
+    })
   }
 }
 
@@ -79,7 +96,15 @@ const mutations = {
     state.transactions = transactions
   },
 
-  [types.GET_ACCOUNT_TRANSACTIONS_FAILURE] (state, err) {}
+  [types.GET_ACCOUNT_TRANSACTIONS_FAILURE] (state, err) {},
+
+  [types.GET_ACCOUNT_ASSETS_REQUEST] (state) {},
+
+  [types.GET_ACCOUNT_ASSETS_SUCCESS] (state, assets) {
+    state.assets = assets
+  },
+
+  [types.GET_ACCOUNT_ASSETS_FAILURE] (state, err) {}
 }
 
 const actions = {
@@ -120,6 +145,25 @@ const actions = {
       })
       .catch(err => {
         commit(types.GET_ACCOUNT_TRANSACTIONS_FAILURE, err)
+        throw err
+      })
+  },
+
+  getAccountAssets ({ commit }) {
+    commit(types.GET_ACCOUNT_ASSETS_REQUEST)
+
+    // TODO: get assetIds via API in the future
+    const assetIds = ['coolcoin#test', 'hotcoin#test']
+    const gettingAccountAssets = assetIds.map(assetId => {
+      return irohaUtil.getAccountAssets(state.accountId, assetId)
+    })
+
+    return Promise.all(gettingAccountAssets)
+      .then(responses => {
+        commit(types.GET_ACCOUNT_ASSETS_SUCCESS, _.flatten(responses))
+      })
+      .catch(err => {
+        commit(types.GET_ACCOUNT_ASSETS_FAILURE, err)
         throw err
       })
   }

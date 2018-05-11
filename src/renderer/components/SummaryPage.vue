@@ -39,16 +39,6 @@
       Transactions
     },
 
-    data () {
-      return {
-        wallets: [
-          { name: 'dollar#russia', amount: '100.00' },
-          { name: 'yen#russia', amount: '100.00' },
-          { name: 'euro#russia', amount: '100.00' }
-        ]
-      }
-    },
-
     computed: {
       ...mapState({
         accountId: state => state.Account.accountId,
@@ -56,12 +46,14 @@
       }),
 
       ...mapGetters({
-        transactions: 'transfers'
+        transactions: 'transfers',
+        wallets: 'wallets'
       })
     },
 
     created () {
       this.$store.dispatch('getAccountTransactions')
+      this.$store.dispatch('getAccountAssets')
     }
   }
 </script>
