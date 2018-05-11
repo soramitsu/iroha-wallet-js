@@ -12,8 +12,15 @@ const adminPubKey = crypto.fromPrivateKey(adminPrivKeyHex).publicKey()
 
 const nodeIp = '51.15.244.195:50051'
 
-irohaUtil.login('admin@test', adminPrivKeyHex, nodeIp)
-  .then(() => irohaUtil.createAccount('alice', 'test', alicePubKey))
-  .then(() => irohaUtil.transferAsset('admin@test', 'alice@test', 'coolcoin#test', '', '100.00'))
-  .then(() => console.log('done!'))
+irohaUtil.login('alice@test', alicePrivKeyHex, nodeIp)
+
+  .then(() => irohaUtil.getAccountAssets('alice@test', 'coolcoin#test'))
+  .then(assets => console.log('\nAlice\'s coolcoin#test:', JSON.stringify(assets, null, '  ')))
+
+  .then(() => irohaUtil.getAccountAssetTransactions('alice@test', 'coolcoin#test'))
+  .then(transactions => console.log('\nAlice\'s transactions of coolcoin#test:', JSON.stringify(transactions, null, '  ')))
+
+  .then(() => irohaUtil.getAccountTransactions('alice@test'))
+  .then(transactions => console.log('\nAlice\'s transactions:', transactions))
+
   .catch(err => console.error(err))
