@@ -277,6 +277,36 @@ function getAccountAssets (accountId, assetId) {
   )
 }
 
+/**
+ * getAssetInfo https://hyperledger.github.io/iroha-api/?protobuf#get-asset-info
+ * @param {String} assetId
+ */
+function getAssetInfo (assetId) {
+  debug('starting getAssetInfo...')
+
+  return sendQuery(
+    () => {
+      return queryBuilder
+        .creatorAccountId(cache.username)
+        .createdTime(Date.now())
+        .queryCounter(1)
+        .getAssetInfo(assetId)
+        .build()
+    },
+    (resolve, reject, responseName, response) => {
+      if (responseName !== 'ASSET_RESPONSE') {
+        return reject(new Error(`Query response error: expected=ASSET_RESPONSE, actual=${responseName}`))
+      }
+
+      const info = response.getAssetResponse().toObject()
+
+      debug('asset info', info)
+
+      resolve(info)
+    }
+  )
+}
+
 /*
  * ===== commands =====
  */
@@ -509,11 +539,21 @@ function makeProtoTxWithKeys (builtTx, keys) {
  *  ===== export ===
  */
 export default {
+  getStoredNodeIp,
+  clearStorage,
   login,
   logout,
+
+  // queries
+  getAccount,
   getAccountAssets,
   getAccountAssetTransactions,
   getAccountTransactions,
-  getStoredNodeIp,
-  clearStorage
+  getAssetInfo,
+
+  // commands
+  createAccount,
+  createAsset,
+  transferAsset,
+  addAssetQuantity
 }

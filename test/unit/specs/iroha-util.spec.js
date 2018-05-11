@@ -107,4 +107,21 @@ describe('iroha-util', function () {
         .catch(err => done(err))
     })
   })
+
+  describe('#getAssetInfo', () => {
+    afterEach(logout)
+
+    it('should fail before login', done => {
+      irohaUtil.getAssetInfo(EXISTING_ASSET)
+        .then(() => done(new Error('query should fail')))
+        .catch(() => done())
+    })
+
+    it('should succeed after login', done => {
+      irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
+        .then(() => irohaUtil.getAssetInfo(EXISTING_ASSET))
+        .then(() => done())
+        .catch(err => done(err))
+    })
+  })
 })
