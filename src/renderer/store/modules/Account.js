@@ -1,6 +1,12 @@
 import _ from 'lodash'
 import irohaUtil from 'util/iroha-util'
 
+// TODO: get assetIds via API in the future
+const DUMMY_ASSET_IDS = [
+  'coolcoin#test',
+  'hotcoin#test'
+]
+
 const types = {
   LOGIN_REQUEST: 'LOGIN_REQUEST',
   LOGIN_SUCCESS: 'LOGIN_SUCCESS',
@@ -26,7 +32,7 @@ const state = {
 
 /*
  * modify an amount object to a string like '123.45'
- **/
+ */
 function amountToString ({ value, precision }) {
   // TODO: use all values from 'first' to 'fourth'
   return String(value.fourth)
@@ -134,7 +140,7 @@ const actions = {
     commit(types.GET_ACCOUNT_TRANSACTIONS_REQUEST)
 
     // TODO: get assetIds via API in the future
-    const assetIds = ['coolcoin#test', 'hotcoin#test']
+    const assetIds = DUMMY_ASSET_IDS
     const gettingAccountAssetsTransactions = assetIds.map(assetId => {
       return irohaUtil.getAccountAssetTransactions(state.accountId, assetId)
     })
@@ -153,7 +159,7 @@ const actions = {
     commit(types.GET_ACCOUNT_ASSETS_REQUEST)
 
     // TODO: get assetIds via API in the future
-    const assetIds = ['coolcoin#test', 'hotcoin#test']
+    const assetIds = DUMMY_ASSET_IDS
     const gettingAccountAssets = assetIds.map(assetId => {
       return irohaUtil.getAccountAssets(state.accountId, assetId)
     })
