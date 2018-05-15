@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
 /*
- * DEBUG=iroha-util babel-node --presets env example/setup-accounts-and-assets.js
+ * NODE_IP=localhost:50051 DEBUG=iroha-util node example/setup-accounts-and-assets.js
  */
-import fs from 'fs'
-import path from 'path'
-import iroha from 'iroha-lib'
-import irohaUtil from '../src/util/iroha-util'
+const fs = require('fs')
+const path = require('path')
+const iroha = require('iroha-lib')
+const irohaUtil = require('../src/util/iroha-util')
 
 const crypto = new iroha.ModelCrypto()
 const adminPrivKeyHex = fs.readFileSync(path.join(__dirname, 'admin@test.priv')).toString().trim()
