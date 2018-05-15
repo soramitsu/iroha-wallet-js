@@ -7,15 +7,15 @@
     label-width="6rem"
   >
     <el-form-item label="TO:" prop="to">
-      <el-input name="to" v-model="form.to" />
+      <el-input name="to" v-model="form.to" :disabled="loading" />
     </el-form-item>
 
     <el-form-item label="AMOUNT:" prop="amount">
-      <el-input name="amount" v-model="form.amount" />
+      <el-input name="amount" v-model="form.amount" :disabled="loading" />
     </el-form-item>
 
     <el-form-item label="MESSAGE:" prop="message">
-      <el-input name="message" v-model="form.message" type="textarea" />
+      <el-input name="message" v-model="form.message" type="textarea" :disabled="loading" />
     </el-form-item>
 
     <el-form-item class="send-button-container">
@@ -23,6 +23,7 @@
         class="send-button"
         type="primary"
         @click="onSubmit"
+        :loading="loading"
       >
         SEND
       </el-button>
@@ -43,7 +44,8 @@
       form: Object,
       maxDecimalDigits: {
         validator: v => Number.isInteger(v) && v >= 0
-      }
+      },
+      loading: Boolean
     },
 
     computed: {
@@ -51,7 +53,7 @@
         // `maxDecimalDigits` specifies the maximum number of digits after decimal point.
         // e.g. if maxDecimalDigits == 5 then '100.12345' is ok
         const amountRegexp = (this.maxDecimalDigits !== 0)
-          ? RegExp(`^[1-9][0-9]*(\\.[0-9]{1,${this.maxDecimalDigits}})?$`)
+          ? RegExp(`^([1-9][0-9]*|0)(\\.[0-9]{1,${this.maxDecimalDigits}})?$`)
           : RegExp(`^[1-9][0-9]*$`)
         const amountMessage = (this.maxDecimalDigits !== 0)
           ? `"AMOUNT" should be a number of max ${this.maxDecimalDigits} decimal digits.`

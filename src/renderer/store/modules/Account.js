@@ -8,6 +8,7 @@ const DUMMY_ASSET_IDS = [
 ]
 
 const types = {
+  RESET: 'RESET',
   LOGIN_REQUEST: 'LOGIN_REQUEST',
   LOGIN_SUCCESS: 'LOGIN_SUCCESS',
   LOGIN_FAILURE: 'LOGIN_FAILURE',
@@ -19,16 +20,23 @@ const types = {
   GET_ACCOUNT_TRANSACTIONS_FAILURE: 'GET_ACCOUNT_TRANSACTIONS_FAILURE',
   GET_ACCOUNT_ASSETS_REQUEST: 'GET_ACCOUNT_ASSETS_REQUEST',
   GET_ACCOUNT_ASSETS_SUCCESS: 'GET_ACCOUNT_ASSETS_SUCCESS',
-  GET_ACCOUNT_ASSETS_FAILURE: 'GET_ACCOUNT_ASSETS_FAILURE'
+  GET_ACCOUNT_ASSETS_FAILURE: 'GET_ACCOUNT_ASSETS_FAILURE',
+  TRANSFER_ASSET_REQUEST: 'TRANSFER_ASSET_REQUEST',
+  TRANSFER_ASSET_SUCCESS: 'TRANSFER_ASSET_SUCCESS',
+  TRANSFER_ASSET_FAILURE: 'TRANSFER_ASSET_FAILURE'
 }
 
-const state = {
-  accountId: '',
-  nodeIp: irohaUtil.getStoredNodeIp(),
-  accountInfo: {},
-  transactions: [],
-  assets: []
+function initialState () {
+  return {
+    accountId: '',
+    nodeIp: irohaUtil.getStoredNodeIp(),
+    accountInfo: {},
+    transactions: [],
+    assets: []
+  }
 }
+
+const state = initialState()
 
 /*
  * modify an amount object to a string like '123.45'
@@ -75,7 +83,8 @@ const getters = {
       return {
         id: a.accountAsset.assetId.replace(/#/g, '$'),
         name: a.accountAsset.assetId,
-        amount: amountToString(a.accountAsset.balance)
+        amount: amountToString(a.accountAsset.balance),
+        precision: a.accountAsset.balance.precision
       }
     })
   },
@@ -86,6 +95,14 @@ const getters = {
 }
 
 const mutations = {
+  [types.RESET] (state) {
+    const s = initialState()
+
+    Object.keys(s).forEach(key => {
+      state[key] = s[key]
+    })
+  },
+
   [types.LOGIN_REQUEST] (state) {},
 
   [types.LOGIN_SUCCESS] (state, account) {
@@ -115,7 +132,13 @@ const mutations = {
     state.assets = assets
   },
 
-  [types.GET_ACCOUNT_ASSETS_FAILURE] (state, err) {}
+  [types.GET_ACCOUNT_ASSETS_FAILURE] (state, err) {},
+
+  [types.TRANSFER_ASSET_REQUEST] (state) {},
+
+  [types.TRANSFER_ASSET_SUCCESS] (state) {},
+
+  [types.TRANSFER_ASSET_FAILURE] (state, err) {}
 }
 
 const actions = {
@@ -134,7 +157,10 @@ const actions = {
     commit(types.LOGOUT_REQUEST)
 
     return irohaUtil.logout()
-      .then(() => commit(types.LOGOUT_SUCCESS))
+      .then(() => {
+        commit(types.RESET)
+        commit(types.LOGOUT_SUCCESS)
+      })
       .catch(err => {
         commit(types.LOGOUT_FAILURE, err)
         throw err
@@ -175,6 +201,19 @@ const actions = {
       })
       .catch(err => {
         commit(types.GET_ACCOUNT_ASSETS_FAILURE, err)
+        throw err
+      })
+  },
+
+  transferAsset ({ commit }, { assetId, to, description = '', amount }) {
+    commit(types.TRANSFER_ASSET_REQUEST)
+
+    return irohaUtil.transferAsset(state.accountId, to, assetId, description, amount)
+      .then(() => {
+        commit(types.TRANSFER_ASSET_SUCCESS)
+      })
+      .catch(err => {
+        commit(types.TRANSFER_ASSET_FAILURE, err)
         throw err
       })
   }
