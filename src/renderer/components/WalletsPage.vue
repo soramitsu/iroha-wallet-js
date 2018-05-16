@@ -45,6 +45,11 @@
       this.openDefaultWallet()
     },
 
+    created () {
+      this.$store.dispatch('getAccountTransactions')
+      this.$store.dispatch('getAccountAssets')
+    },
+
     methods: {
       openDefaultWallet () {
         if (this.wallets[0]) {
