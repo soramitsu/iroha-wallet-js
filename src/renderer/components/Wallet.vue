@@ -90,9 +90,17 @@
           description: this.form.message
         })
           .then(() => {
-            alert('Transfer request has successfully been sent!')
+            this.$message({
+              message: 'Transfer successful!',
+              type: 'success'
+            })
           })
-          .catch(err => alert(err))
+          .catch(err => {
+            console.error(err)
+            this.$alert(err.message, 'Transfer error', {
+              type: 'error'
+            })
+          })
           .finally(() => { this.isLoading = false })
       }
     }

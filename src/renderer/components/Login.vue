@@ -99,26 +99,27 @@
 
       onSubmit () {
         this.$refs['form'].validate((valid) => {
-          if (valid) {
-            this.isLoading = true
+          if (!valid) return false
 
-            this.$store.dispatch('login', {
-              username: this.form.username,
-              privateKey: this.form.privateKey,
-              nodeIp: this.form.nodeIp
+          this.isLoading = true
+
+          this.$store.dispatch('login', {
+            username: this.form.username,
+            privateKey: this.form.privateKey,
+            nodeIp: this.form.nodeIp
+          })
+            .then(account => {
+              this.$router.push('/dashboard/summary-page')
             })
-              .then(account => {
-                this.$router.push('/dashboard/summary-page')
+            .catch(err => {
+              console.error(err)
+              this.$alert(err.message, 'Login error', {
+                type: 'error'
               })
-              .catch(err => {
-                alert(err)
-              })
-              .finally(() => {
-                this.isLoading = false
-              })
-          } else {
-            return false
-          }
+            })
+            .finally(() => {
+              this.isLoading = false
+            })
         })
       }
     }
