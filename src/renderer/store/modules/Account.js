@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import grpc from 'grpc'
 import irohaUtil from 'util/iroha-util'
 
 // TODO: get assetIds via API in the future
@@ -32,7 +33,8 @@ function initialState () {
     nodeIp: irohaUtil.getStoredNodeIp(),
     accountInfo: {},
     transactions: [],
-    assets: []
+    assets: [],
+    connectionError: null
   }
 }
 
@@ -94,6 +96,23 @@ const getters = {
   }
 }
 
+/**
+ * Store a connection error so the top component can handle it.
+ * @param {Object} state
+ * @param {Error} err
+ */
+function handleError (state, err) {
+  switch (err.code) {
+    case grpc.status.UNAVAILABLE:
+    case grpc.status.CANCELLED:
+      state.connectionError = err
+      break
+
+    default:
+      state.connectionError = null
+  }
+}
+
 const mutations = {
   [types.RESET] (state) {
     const s = initialState()
@@ -110,13 +129,17 @@ const mutations = {
     // TODO: state.accountInfo = account.json_data ?
   },
 
-  [types.LOGIN_FAILURE] (state, err) {},
+  [types.LOGIN_FAILURE] (state, err) {
+    handleError(state, err)
+  },
 
   [types.LOGOUT_REQUEST] (state) {},
 
   [types.LOGOUT_SUCCESS] (state) {},
 
-  [types.LOGOUT_FAILURE] (state, err) {},
+  [types.LOGOUT_FAILURE] (state, err) {
+    handleError(state, err)
+  },
 
   [types.GET_ACCOUNT_TRANSACTIONS_REQUEST] (state) {},
 
@@ -124,7 +147,9 @@ const mutations = {
     state.transactions = transactions
   },
 
-  [types.GET_ACCOUNT_TRANSACTIONS_FAILURE] (state, err) {},
+  [types.GET_ACCOUNT_TRANSACTIONS_FAILURE] (state, err) {
+    handleError(state, err)
+  },
 
   [types.GET_ACCOUNT_ASSETS_REQUEST] (state) {},
 
@@ -132,13 +157,17 @@ const mutations = {
     state.assets = assets
   },
 
-  [types.GET_ACCOUNT_ASSETS_FAILURE] (state, err) {},
+  [types.GET_ACCOUNT_ASSETS_FAILURE] (state, err) {
+    handleError(state, err)
+  },
 
   [types.TRANSFER_ASSET_REQUEST] (state) {},
 
   [types.TRANSFER_ASSET_SUCCESS] (state) {},
 
-  [types.TRANSFER_ASSET_FAILURE] (state, err) {}
+  [types.TRANSFER_ASSET_FAILURE] (state, err) {
+    handleError(state, err)
+  }
 }
 
 const actions = {

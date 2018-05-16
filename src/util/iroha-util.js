@@ -131,7 +131,9 @@ function sendQuery (
     // c.f. https://github.com/grpc/grpc/issues/13163
     const timer = setTimeout(() => {
       queryClient.$channel.close()
-      reject(new Error('please check IP address OR your internet connection'))
+      const err = new Error('please check IP address OR your internet connection')
+      err.code = grpc.status.CANCELLED
+      reject(err)
     }, timeoutLimit)
 
     queryClient.find(protoQuery, (err, response) => {
