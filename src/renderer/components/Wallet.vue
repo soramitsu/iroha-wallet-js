@@ -67,10 +67,11 @@
       fetchWalletByWalletId (walletId) {
         return this.$store.dispatch('getAccountAssets')
           .then(() => {
-            this.wallet = this.$store.getters.wallets.find((w) => (w.id === walletId))
+            this.wallet = this.$store.getters.wallets
+              .find((w) => (w.id === walletId))
             this.maxDecimalDigits = this.wallet.precision
-            this.$refs['form'].clearValidationMessage()
           })
+          .then(() => this.$refs['form'].clearValidationMessage())
       },
 
       fetchTransactionsByWalletId (walletId) {
@@ -94,6 +95,7 @@
               message: 'Transfer successful!',
               type: 'success'
             })
+            this.activeTabName = 'history'
           })
           .catch(err => {
             console.error(err)
