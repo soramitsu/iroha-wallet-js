@@ -1,0 +1,555 @@
+/* eslint-disable no-unused-vars */
+const debug = require('debug')('iroha-util')
+const iroha = require('iroha-lib')
+const grpc = require('grpc')
+
+/**
+ * default timeout limit of queries
+ */
+const DEFAULT_TIMEOUT_LIMIT = 5000
+
+/**
+ * cached items available from start to end of the app
+ * plus, `nodeIp` is persisted by localStorage
+ */
+const cache = {
+  username: null, // NOT persisted by localStorage
+  keys: null, // NOT persisted by localStorage
+  nodeIp: null // persisted by localStorage
+}
+
+/**
+ * mock localStorage for testing environment
+ */
+const localStorage = global.localStorage || {
+  setItem () {},
+  getItem () {},
+  removeItem () {}
+}
+
+const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
+const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
+const pbResponse = require('iroha-lib/pb/responses_pb.js')
+const txBuilder = new iroha.ModelTransactionBuilder()
+const queryBuilder = new iroha.ModelQueryBuilder()
+const protoTxHelper = new iroha.ModelProtoTransaction()
+const protoQueryHelper = new iroha.ModelProtoQuery()
+const crypto = new iroha.ModelCrypto()
+
+/*
+ * ===== functions =====
+ */
+/**
+ * login
+ * @param {String} username
+ * @param {String} privateKey length is 64
+ * @param {String} nodeIp
+ */
+function login (username, privateKey, nodeIp) {
+  debug('starting login...')
+
+  if (privateKey.length !== 64) {
+    return Promise.reject(new Error('privateKey should have length of 64'))
+  }
+
+  const keys = crypto.convertFromExisting(
+    crypto.fromPrivateKey(privateKey).publicKey().hex(),
+    privateKey
+  )
+
+  cache.username = username
+  cache.keys = keys
+  cache.nodeIp = nodeIp
+
+  localStorage.setItem('iroha-wallet:nodeIp', nodeIp)
+
+  return getAccount(username)
+    .then(account => {
+      debug('login succeeded!')
+      return account
+    })
+    .catch(err => {
+      debug('login failed')
+      throw err
+    })
+}
+
+/**
+ * clear local cache
+ */
+function logout () {
+  cache.username = null
+  cache.keys = null
+  cache.nodeIp = null
+
+  return Promise.resolve()
+}
+
+/**
+ * return node IP which was used before
+ */
+function getStoredNodeIp () {
+  return localStorage.getItem('iroha-wallet:nodeIp') || ''
+}
+
+/**
+ * clear localStorage
+ */
+function clearStorage () {
+  localStorage.removeItem('iroha-wallet:nodeIp')
+}
+
+/*
+ * ===== queries =====
+ */
+/**
+ * wrapper function of queries
+ * @param {Function} buildQuery
+ * @param {Function} onResponse
+ * @param {Number} timeoutLimit timeoutLimit
+ */
+function sendQuery (
+  buildQuery = function () {},
+  onResponse = function (resolve, reject, responseName, response) {},
+  timeoutLimit = DEFAULT_TIMEOUT_LIMIT
+) {
+  return new Promise((resolve, reject) => {
+    const queryClient = new endpointGrpc.QueryServiceClient(
+      cache.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    const query = buildQuery()
+    const protoQuery = makeProtoQueryWithKeys(query, cache.keys)
+
+    debug('submitting query...')
+    debug('peer ip:', cache.nodeIp)
+    debug('parameters:', JSON.stringify(protoQuery.toObject().payload, null, '  '))
+    debug('')
+
+    // grpc-node hangs against unresponsive server, which possibly occur when
+    // invalid node IP is set. To avoid this problem, we use timeout timer.
+    // c.f. https://github.com/grpc/grpc/issues/13163
+    const timer = setTimeout(() => {
+      queryClient.$channel.close()
+      reject(new Error('please check IP address OR your internet connection'))
+    }, timeoutLimit)
+
+    queryClient.find(protoQuery, (err, response) => {
+      clearTimeout(timer)
+
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted query successfully!')
+
+      const type = response.getResponseCase()
+      const responseName = getProtoEnumName(
+        pbResponse.QueryResponse.ResponseCase,
+        'iroha.protocol.QueryResponse',
+        type
+      )
+
+      onResponse(resolve, reject, responseName, response)
+    })
+  })
+}
+
+/**
+ * getAccount https://hyperledger.github.io/iroha-api/#get-account
+ * @param {String} accountId
+ */
+function getAccount (accountId) {
+  debug('starting getAccount...')
+
+  return sendQuery(
+    () => {
+      return queryBuilder
+        .creatorAccountId(cache.username)
+        .createdTime(Date.now())
+        .queryCounter(1)
+        .getAccount(accountId)
+        .build()
+    },
+    (resolve, reject, responseName, response) => {
+      if (responseName !== 'ACCOUNT_RESPONSE') {
+        return reject(new Error(`Query response error: expected=ACCOUNT_RESPONSE, actual=${responseName}`))
+      }
+
+      const account = response.getAccountResponse().getAccount().toObject()
+
+      debug('account', account)
+
+      resolve(account)
+    }
+  )
+}
+
+/**
+ * getAccountAssetTransactions https://hyperledger.github.io/iroha-api/#get-account-asset-transactions
+ * @param {String} accountId
+ * @param {String} assetId
+ */
+function getAccountAssetTransactions (accountId, assetId) {
+  debug('starting getAccountAssetTransactions...')
+
+  return sendQuery(
+    () => {
+      return queryBuilder
+        .creatorAccountId(cache.username)
+        .createdTime(Date.now())
+        .queryCounter(1)
+        .getAccountAssetTransactions(accountId, assetId)
+        .build()
+    },
+    (resolve, reject, responseName, response) => {
+      if (responseName !== 'TRANSACTIONS_RESPONSE') {
+        return reject(new Error(`Query response error: expected=TRANSACTIONS_RESPONSE, actual=${responseName}`))
+      }
+
+      const transactions = response.getTransactionsResponse().toObject().transactionsList
+
+      debug('transactions', transactions)
+
+      resolve(transactions)
+    }
+  )
+}
+
+/**
+ * getAccountAssets https://hyperledger.github.io/iroha-api/#get-account-assets
+ * @param {String} accountId
+ * @param {String} assetId
+ */
+function getAccountAssets (accountId, assetId) {
+  debug('starting getAccountAssets...')
+
+  return sendQuery(
+    () => {
+      return queryBuilder
+        .creatorAccountId(cache.username)
+        .createdTime(Date.now())
+        .queryCounter(1)
+        .getAccountAssets(accountId, assetId)
+        .build()
+    },
+    (resolve, reject, responseName, response) => {
+      if (responseName !== 'ACCOUNT_ASSETS_RESPONSE') {
+        return reject(new Error(`Query response error: expected=ACCOUNT_ASSETS_RESPONSE, actual=${responseName}`))
+      }
+
+      const assets = response.getAccountAssetsResponse().toObject()
+
+      debug('assets', assets)
+
+      resolve(assets)
+    }
+  )
+}
+
+/*
+ * ===== commands =====
+ */
+// TODO: refactor commands (e.g. make common parts together, etc.)
+/**
+ * createAsset https://hyperledger.github.io/iroha-api/#create-asset
+ * @param {String} assetName
+ * @param {String} domainI
+ * @param {Number} precision
+ */
+function createAsset (assetName, domainId, precision) {
+  debug('starting createAsset...')
+
+  let txClient, txHash
+
+  return new Promise((resolve, reject) => {
+    const tx = txBuilder
+      .creatorAccountId(cache.username)
+      .txCounter(1)
+      .createdTime(Date.now())
+      .createAsset(assetName, domainId, precision)
+      .build()
+    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
+
+    txClient = new endpointGrpc.CommandServiceClient(
+      cache.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    txHash = blob2array(tx.hash().blob())
+
+    debug('submitting transaction...')
+    debug('peer ip:', cache.nodeIp)
+    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
+    debug('txhash:', Buffer.from(txHash).toString('hex'))
+    debug('')
+
+    txClient.torii(protoTx, (err, data) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted transaction successfully!')
+      resolve()
+    })
+  })
+    .then(() => {
+      debug('sleep 5 seconds...')
+      return sleep(5000)
+    })
+    .then(() => {
+      debug('sending transaction status request...')
+
+      return new Promise((resolve, reject) => {
+        const request = new pbEndpoint.TxStatusRequest()
+
+        request.setTxHash(txHash)
+
+        txClient.status(request, (err, response) => {
+          if (err) {
+            return reject(err)
+          }
+
+          const status = response.getTxStatus()
+          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
+          const statusName = getProtoEnumName(
+            TxStatus,
+            'iroha.protocol.TxStatus',
+            status
+          )
+
+          if (statusName !== 'COMMITTED') {
+            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
+          }
+
+          resolve()
+        })
+      })
+    })
+}
+
+/**
+ * addAssetQuantity https://hyperledger.github.io/iroha-api/#add-asset-quantity
+ * @param {String} accountId
+ * @param {String} assetId
+ * @param {String} amount
+ */
+function addAssetQuantity (accountId, assetId, amount) {
+  debug('starting addAssetQuantity...')
+
+  let txClient, txHash
+
+  return new Promise((resolve, reject) => {
+    const tx = txBuilder
+      .creatorAccountId(cache.username)
+      .txCounter(1)
+      .createdTime(Date.now())
+      .addAssetQuantity(accountId, assetId, amount)
+      .build()
+    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
+
+    txClient = new endpointGrpc.CommandServiceClient(
+      cache.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    txHash = blob2array(tx.hash().blob())
+
+    debug('submitting transaction...')
+    debug('peer ip:', cache.nodeIp)
+    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
+    debug('txhash:', Buffer.from(txHash).toString('hex'))
+    debug('')
+
+    txClient.torii(protoTx, (err, data) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted transaction successfully!')
+      resolve()
+    })
+  })
+    .then(() => {
+      debug('sleep 5 seconds...')
+      return sleep(5000)
+    })
+    .then(() => {
+      debug('sending transaction status request...')
+
+      return new Promise((resolve, reject) => {
+        const request = new pbEndpoint.TxStatusRequest()
+
+        request.setTxHash(txHash)
+
+        txClient.status(request, (err, response) => {
+          if (err) {
+            return reject(err)
+          }
+
+          const status = response.getTxStatus()
+          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
+          const statusName = getProtoEnumName(
+            TxStatus,
+            'iroha.protocol.TxStatus',
+            status
+          )
+
+          if (statusName !== 'COMMITTED') {
+            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
+          }
+
+          resolve()
+        })
+      })
+    })
+}
+
+/**
+ * transferAsset https://hyperledger.github.io/iroha-api/#transfer-asset
+ * @param {String} srcAccountId
+ * @param {String} destAccountId
+ * @param {String} assetId
+ * @param {String} description
+ * @param {String} amount
+ */
+function transferAsset (srcAccountId, destAccountId, assetId, description, amount) {
+  debug('starting transferAsset...')
+
+  let txClient, txHash
+
+  return new Promise((resolve, reject) => {
+    const tx = txBuilder
+      .creatorAccountId(cache.username)
+      .txCounter(1)
+      .createdTime(Date.now())
+      .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
+      .build()
+    const protoTx = makeProtoTxWithKeys(tx, cache.keys)
+
+    txClient = new endpointGrpc.CommandServiceClient(
+      cache.nodeIp,
+      grpc.credentials.createInsecure()
+    )
+    txHash = blob2array(tx.hash().blob())
+
+    debug('submitting transaction...')
+    debug('peer ip:', cache.nodeIp)
+    debug('parameters:', JSON.stringify(protoTx.toObject().payload, null, '  '))
+    debug('txhash:', Buffer.from(txHash).toString('hex'))
+    debug('')
+
+    txClient.torii(protoTx, (err, data) => {
+      if (err) {
+        return reject(err)
+      }
+
+      debug('submitted transaction successfully!')
+      resolve()
+    })
+  })
+    .then(() => {
+      debug('sleep 5 seconds...')
+      return sleep(5000)
+    })
+    .then(() => {
+      debug('sending transaction status request...')
+
+      return new Promise((resolve, reject) => {
+        const request = new pbEndpoint.TxStatusRequest()
+
+        request.setTxHash(txHash)
+
+        txClient.status(request, (err, response) => {
+          if (err) {
+            return reject(err)
+          }
+
+          const status = response.getTxStatus()
+          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
+          const statusName = getProtoEnumName(
+            TxStatus,
+            'iroha.protocol.TxStatus',
+            status
+          )
+
+          if (statusName !== 'COMMITTED') {
+            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
+          }
+
+          resolve()
+        })
+      })
+    })
+}
+
+/*
+ *  ===== utilities ===
+ */
+function sleep (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function blob2array (blob) {
+  const bytearray = new Uint8Array(blob.size())
+  for (let i = 0; i < blob.size(); ++i) {
+    bytearray[i] = blob.get(i)
+  }
+  return bytearray
+}
+
+const protoEnumName = {}
+function getProtoEnumName (obj, key, value) {
+  if (protoEnumName.hasOwnProperty(key)) {
+    if (protoEnumName[key].length < value) {
+      return 'unknown'
+    } else {
+      return protoEnumName[key][value]
+    }
+  } else {
+    protoEnumName[key] = []
+    for (var k in obj) {
+      let idx = obj[k]
+      if (isNaN(idx)) {
+        debug(
+          'getProtoEnumName:wrong enum value, now is type of ' +
+            typeof idx +
+            ' should be integer'
+        )
+      } else {
+        protoEnumName[key][idx] = k
+      }
+    }
+    return getProtoEnumName(obj, key, value)
+  }
+}
+
+function makeProtoQueryWithKeys (builtQuery, keys) {
+  const pbQuery = require('iroha-lib/pb/queries_pb.js').Query
+
+  const blob = protoQueryHelper.signAndAddSignature(builtQuery, keys).blob()
+  const arr = blob2array(blob)
+  const protoQuery = pbQuery.deserializeBinary(arr)
+
+  return protoQuery
+}
+
+function makeProtoTxWithKeys (builtTx, keys) {
+  const pbTransaction = require('iroha-lib/pb/queries_pb.js').Transaction
+
+  const blob = protoTxHelper.signAndAddSignature(builtTx, keys).blob()
+  const arr = blob2array(blob)
+  const protoTx = pbTransaction.deserializeBinary(arr)
+
+  return protoTx
+}
+
+/*
+ *  ===== export ===
+ */
+export default {
+  login,
+  logout,
+  getAccountAssets,
+  getAccountAssetTransactions,
+  getStoredNodeIp,
+  clearStorage
+}

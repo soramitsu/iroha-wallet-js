@@ -4,13 +4,21 @@
 
     <el-form class="login-form" ref="form" :model="form" :rules="rules" label-position="top">
       <el-form-item label="username:" prop="username">
-        <el-input name="username" v-model="form.username"></el-input>
+        <el-input
+          name="username"
+          v-model="form.username"
+          :disabled="isLoading"
+        ></el-input>
       </el-form-item>
 
       <el-form-item label="private key:" prop="privateKey">
         <el-row type="flex" justify="space-between">
           <el-col :span="20">
-            <el-input name="privateKey" v-model="form.privateKey"></el-input>
+            <el-input
+              name="privateKey"
+              v-model="form.privateKey"
+              :disabled="isLoading"
+            ></el-input>
           </el-col>
 
           <el-upload
@@ -18,6 +26,7 @@
             :auto-upload="false"
             :show-file-list="false"
             :on-change="onFileChosen"
+            :disabled="isLoading"
           >
             <el-button>
               <i class="el-icon-upload2"></i>
@@ -27,7 +36,10 @@
       </el-form-item>
 
       <el-form-item label="node ip:" prop="nodeIp">
-        <el-input v-model="form.nodeIp"></el-input>
+        <el-input
+          v-model="form.nodeIp"
+          :disabled="isLoading"
+        ></el-input>
       </el-form-item>
 
       <el-form-item class="login-button-container">
@@ -35,6 +47,7 @@
           class="login-button"
           type="primary"
           @click="onSubmit"
+          :loading="isLoading"
         >
           Login
         </el-button>
@@ -44,15 +57,18 @@
 </template>
 
 <script>
+  import irohaUtil from 'util/iroha-util'
+
   export default {
     name: 'login',
 
     data () {
       return {
+        isLoading: false,
         form: {
           username: '',
           privateKey: '',
-          nodeIp: ''
+          nodeIp: irohaUtil.getStoredNodeIp()
         },
         rules: {
           username: [
@@ -86,7 +102,22 @@
       onSubmit () {
         this.$refs['form'].validate((valid) => {
           if (valid) {
-            this.$router.push('/dashboard/summary-page')
+            this.isLoading = true
+
+            irohaUtil.login(
+              this.form.username,
+              this.form.privateKey,
+              this.form.nodeIp
+            )
+              .then(account => {
+                this.$router.push('/dashboard/summary-page')
+              })
+              .catch(err => {
+                alert(err)
+              })
+              .finally(() => {
+                this.isLoading = false
+              })
           } else {
             return false
           }

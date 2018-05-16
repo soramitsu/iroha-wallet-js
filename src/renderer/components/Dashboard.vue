@@ -15,10 +15,10 @@
         </div>
 
         <div class="sidemenu__bottom">
-          <router-link class="sidemenu__item" to="/login">
+          <div class="sidemenu__item" @click="logout">
             <i class="el-icon-back sidemenu__icon"></i>
             logout
-          </router-link>
+          </div>
         </div>
       </div>
     </aside>
@@ -30,8 +30,17 @@
 </template>
 
 <script>
+  import irohaUtil from 'util/iroha-util'
+
   export default {
-    name: 'dashboard'
+    name: 'dashboard',
+
+    methods: {
+      logout () {
+        irohaUtil.logout()
+          .then(() => this.$router.push('/login'))
+      }
+    }
   }
 </script>
 
@@ -64,6 +73,7 @@
         padding: 10px;
         text-decoration: none;
         transition: .1s ease background;
+        cursor: pointer;
 
         &:hover {
           background: darken($--color-primary, 5%);
