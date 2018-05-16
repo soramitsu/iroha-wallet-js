@@ -3,6 +3,7 @@
     <el-table
       class="transaction-table"
       :data="transactions"
+      v-loading="loading"
     >
       <el-table-column prop="id" label="id" width="40" />
       <el-table-column prop="from" label="from" />
@@ -29,7 +30,8 @@
       currency: {
         type: Boolean,
         default: false
-      }
+      },
+      loading: Boolean
     },
 
     filters: {

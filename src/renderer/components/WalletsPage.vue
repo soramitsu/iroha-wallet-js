@@ -1,5 +1,5 @@
 <template>
-  <div class="wallets-page">
+  <div class="wallets-page" v-loading="!isReady">
     <div class="sidemenu">
       <router-link
         v-for="wallet in wallets"
@@ -14,6 +14,8 @@
 
     <div class="main">
       <router-view />
+
+      <div v-if="wallets.length === 0">No assets</div>
     </div>
   </div>
 </template>
@@ -23,6 +25,12 @@
 
   export default {
     name: 'wallets-page',
+
+    data () {
+      return {
+        isReady: false
+      }
+    },
 
     computed: {
       ...mapGetters({
@@ -46,8 +54,10 @@
     },
 
     created () {
-      this.$store.dispatch('getAccountTransactions')
-      this.$store.dispatch('getAccountAssets')
+      Promise.all([
+        this.$store.dispatch('getAccountTransactions'),
+        this.$store.dispatch('getAccountAssets')
+      ]).finally(() => { this.isReady = true })
     },
 
     methods: {

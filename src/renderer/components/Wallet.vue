@@ -4,7 +4,7 @@
 
     <el-tabs class="wallet__tabs" v-model="activeTabName">
       <el-tab-pane label="HISTORY" name="history">
-        <transactions :transactions="transactions" />
+        <transactions :transactions="transactions" :loading="!isReady" />
       </el-tab-pane>
 
       <el-tab-pane label="SEND" name="send">
@@ -12,7 +12,7 @@
           ref="form"
           v-model="form"
           :maxDecimalDigits="maxDecimalDigits"
-          :loading="isLoading"
+          :loading="isSending"
           @submit="onSubmit"
         ></transfer-form>
       </el-tab-pane>
@@ -39,7 +39,8 @@
         transactions: [],
         form: {},
         maxDecimalDigits: 0,
-        isLoading: false
+        isReady: false,
+        isSending: false
       }
     },
 
@@ -53,14 +54,12 @@
         Object.assign(this.$data, this.$options.data())
 
         this.fetchWalletByWalletId(this.$route.params.walletId)
-          .then(() => this.$refs['form'].clearValidationMessage())
         this.fetchTransactionsByWalletId(this.$route.params.walletId)
       }
     },
 
     created () {
       this.fetchWalletByWalletId(this.$route.params.walletId)
-        .then(() => this.$refs['form'].clearValidationMessage())
       this.fetchTransactionsByWalletId(this.$route.params.walletId)
     },
 
@@ -68,9 +67,9 @@
       fetchWalletByWalletId (walletId) {
         return this.$store.dispatch('getAccountAssets')
           .then(() => {
-            this.wallet = this.$store.getters.wallets
-              .find((w) => (w.id === walletId))
+            this.wallet = this.$store.getters.wallets.find((w) => (w.id === walletId))
             this.maxDecimalDigits = this.wallet.precision
+            this.$refs['form'].clearValidationMessage()
           })
       },
 
@@ -79,10 +78,11 @@
           .then(() => {
             this.transactions = this.$store.getters.getTransfersByWalletId(walletId)
           })
+          .finally(() => { this.isReady = true })
       },
 
       onSubmit () {
-        this.isLoading = true
+        this.isSending = true
         this.$store.dispatch('transferAsset', {
           assetId: this.wallet.name,
           to: this.form.to,
@@ -101,7 +101,7 @@
               type: 'error'
             })
           })
-          .finally(() => { this.isLoading = false })
+          .finally(() => { this.isSending = false })
       }
     }
   }

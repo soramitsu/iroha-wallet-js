@@ -12,17 +12,19 @@
       </el-col>
 
       <el-col :span="12">
-        <el-card class="wallet-card">
+        <el-card class="wallet-card" v-loading="!isReady">
           <div v-for="wallet in wallets" :key="wallet.name">
             {{ wallet.name }} {{ wallet.amount }}
           </div>
+
+          <div v-if="wallets.length === 0">No assets</div>
         </el-card>
       </el-col>
     </el-row>
 
     <el-row class="summary-page__row">
       <el-card>
-        <transactions :transactions="transactions" currency />
+        <transactions currency :transactions="transactions" :loading="!isReady" />
       </el-card>
     </el-row>
   </div>
@@ -39,6 +41,12 @@
       Transactions
     },
 
+    data () {
+      return {
+        isReady: false
+      }
+    },
+
     computed: {
       ...mapState({
         accountId: state => state.Account.accountId,
@@ -52,8 +60,10 @@
     },
 
     created () {
-      this.$store.dispatch('getAccountTransactions')
-      this.$store.dispatch('getAccountAssets')
+      Promise.all([
+        this.$store.dispatch('getAccountTransactions'),
+        this.$store.dispatch('getAccountAssets')
+      ]).finally(() => { this.isReady = true })
     }
   }
 </script>
