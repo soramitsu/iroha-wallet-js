@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import grpc from 'grpc'
 import irohaUtil from 'util/iroha-util'
+import { amountToString } from 'util/iroha-amount'
 
 // TODO: get assetIds via API in the future
 const DUMMY_ASSET_IDS = [
@@ -39,16 +40,6 @@ function initialState () {
 }
 
 const state = initialState()
-
-/*
- * modify an amount object to a string like '123.45'
- */
-function amountToString ({ value, precision }) {
-  // TODO: use all values from 'first' to 'fourth'
-  return String(value.fourth)
-    .replace(RegExp(`(\\d{${precision}})$`), '.$1')
-    .replace(/^\./, '0.')
-}
 
 const getters = {
   transfers (state) {
