@@ -5,7 +5,6 @@
       :data="transactions"
       v-loading="loading"
     >
-      <el-table-column prop="id" label="id" width="40" />
       <el-table-column prop="from" label="from" />
       <el-table-column prop="to" label="to" />
       <el-table-column prop="amount" label="amount" />
