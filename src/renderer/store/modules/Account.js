@@ -68,7 +68,34 @@ const getters = {
       })
     })
 
-    return transfers
+    /*
+     * As actions.getAccountTransactions() does, we fetch account's txs
+     * by multiple getAccount*Asset*Transactions calls.
+     *
+     * Also, getAccount*Asset*Transactions returns txs each of which includes
+     * one or more command(s), which possibly includes also commands issued
+     * against different asset.
+     *
+     * Therefore, when merging transactions for multiple assets, duplication
+     * possibly occurs.
+     * e.g.
+     *    accountAssetTransactions_of_asset_A = [
+     *      { commands: [command_for_asset_A_1, command_for_asset_B_1] },
+     *      { commands: [command_for_asset_A_2] }
+     *    ]
+     *    accountAssetTransactions_of_asset_B = [
+     *      { commands: [command_for_asset_A_1, command_for_asset_B_1] }
+     *    ]
+     *    // -> command_for_asset_A_1 and B_1 duplicates!
+     *
+     * To avoid it, we uniq the transactions.
+     */
+    return _(transfers)
+      .chain()
+      .uniqWith(_.isEqual)
+      .sortBy('date')
+      .reverse()
+      .value()
   },
 
   wallets (state) {
