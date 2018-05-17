@@ -29,12 +29,12 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "date-fns": "^1.29.0",
     "debug": "^3.1.0",
     "element-ui": "^2.3.4",
     "grpc": "^1.9.1",
     "iroha-lib": "^0.0.6",
     "lodash": "^4.17.5",
-    "moment": "^2.22.1",
     "node-sass": "^4.8.3",
     "sass-loader": "^7.0.1",
     "vue": "^2.5.16",

@@ -19,7 +19,7 @@
 </template>
 
 <script>
-  import moment from 'moment'
+  import { filters as dateFilters } from 'util/date-format'
 
   export default {
     name: 'transactions',
@@ -34,9 +34,7 @@
     },
 
     filters: {
-      formatDate (value) {
-        return moment(value).format('DD.MM.YYYY')
-      }
+      ...dateFilters
     }
   }
 </script>
