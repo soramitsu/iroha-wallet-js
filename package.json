@@ -2,7 +2,10 @@
   "name": "iroha-wallet-js",
   "productName": "iroha-wallet-js",
   "version": "0.0.0",
-  "author": "Vyacheslav Bikbaev <la.sintez@gmail.com>",
+  "author": "Keiji Yahata <yahata@soramitsu.co.jp>",
+  "contributors": [
+    "Vyacheslav Bikbaev <la.sintez@gmail.com>"
+  ],
   "description": "An example wallet application for Iroha",
   "license": null,
   "main": "./dist/electron/main.js",
