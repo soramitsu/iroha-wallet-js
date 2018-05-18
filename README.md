@@ -8,6 +8,9 @@
 # install dependencies
 yarn install
 
+# rebuild native modules for Electron environment
+yarn rebuild
+
 # serve with hot reload at localhost:9080
 yarn dev
 
