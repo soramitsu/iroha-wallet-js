@@ -30,14 +30,12 @@
 </template>
 
 <script>
-  import irohaUtil from 'util/iroha-util'
-
   export default {
     name: 'dashboard',
 
     methods: {
       logout () {
-        irohaUtil.logout()
+        this.$store.dispatch('logout')
           .then(() => this.$router.push('/login'))
       }
     }
@@ -48,7 +46,7 @@
   @import "~@/styles/element-variables.scss";
 
   .dashboard-container {
-    min-height: 100vh;
+    height: 100vh;
   }
 
   .aside {
@@ -92,5 +90,7 @@
 
   .main {
     flex: 1;
+    height: 100vh;
+    overflow: auto;
   }
 </style>

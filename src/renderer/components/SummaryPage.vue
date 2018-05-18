@@ -3,32 +3,35 @@
     <el-row class="summary-page__row" type="flex" :gutter="15">
       <el-col :span="12">
         <el-card class="user-card">
-          <div class="user-card__account-id">accountname@domain</div>
+          <div class="user-card__account-id">{{ accountId }}</div>
 
-          <div v-for="(value, key) in user.info" :key="key">
+          <div v-for="(value, key) in accountInfo" :key="key">
             {{ key }}: {{ value }}
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="12">
-        <el-card class="wallet-card">
+        <el-card class="wallet-card" v-loading="!isReady">
           <div v-for="wallet in wallets" :key="wallet.name">
             {{ wallet.name }} {{ wallet.amount }}
           </div>
+
+          <div v-if="wallets.length === 0">No assets</div>
         </el-card>
       </el-col>
     </el-row>
 
     <el-row class="summary-page__row">
       <el-card>
-        <transactions :transactions="transactions" currency />
+        <transactions currency :transactions="transactions" :loading="!isReady" />
       </el-card>
     </el-row>
   </div>
 </template>
 
 <script>
+  import { mapState, mapGetters } from 'vuex'
   import Transactions from '@/components/Transactions'
 
   export default {
@@ -40,28 +43,27 @@
 
     data () {
       return {
-        user: {
-          accountId: 'accountname@domain',
-          info: {
-            'Gender': 'Male',
-            'Some other info': 'Kek',
-            'Maybe other info': '12345'
-          }
-        },
-
-        wallets: [
-          { name: 'dollar#russia', amount: '100.00' },
-          { name: 'yen#russia', amount: '100.00' },
-          { name: 'euro#russia', amount: '100.00' }
-        ],
-
-        transactions: [
-          { id: '1', from: 'roma@russia', to: 'you', amount: '100.00', currency: 'dollar#russia', date: '11.04.2017' },
-          { id: '1', from: 'roma@russia', to: 'you', amount: '100.00', currency: 'dollar#russia', date: '11.04.2017' },
-          { id: '1', from: 'roma@russia', to: 'you', amount: '100.00', currency: 'dollar#russia', date: '11.04.2017' },
-          { id: '1', from: 'roma@russia', to: 'you', amount: '100.00', currency: 'dollar#russia', date: '11.04.2017' }
-        ]
+        isReady: false
       }
+    },
+
+    computed: {
+      ...mapState({
+        accountId: state => state.Account.accountId,
+        accountInfo: state => state.Account.accountInfo
+      }),
+
+      ...mapGetters({
+        transactions: 'transfers',
+        wallets: 'wallets'
+      })
+    },
+
+    created () {
+      Promise.all([
+        this.$store.dispatch('getAccountTransactions'),
+        this.$store.dispatch('getAccountAssets')
+      ]).finally(() => { this.isReady = true })
     }
   }
 </script>

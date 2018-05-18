@@ -1,5 +1,5 @@
 <template>
-  <div class="wallets-page">
+  <div class="wallets-page" v-loading="!isReady">
     <div class="sidemenu">
       <router-link
         v-for="wallet in wallets"
@@ -14,22 +14,28 @@
 
     <div class="main">
       <router-view />
+
+      <div v-if="wallets.length === 0">No assets</div>
     </div>
   </div>
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
+
   export default {
     name: 'wallets-page',
 
     data () {
       return {
-        wallets: [
-          { id: 'wallet-1', name: 'dollar#russia', amount: '100.00' },
-          { id: 'wallet-2', name: 'yen#russia', amount: '100.00' },
-          { id: 'wallet-3', name: 'euro#russia', amount: '100.00' }
-        ]
+        isReady: false
       }
+    },
+
+    computed: {
+      ...mapGetters({
+        wallets: 'wallets'
+      })
     },
 
     watch: {
@@ -45,6 +51,13 @@
     mounted () {
       // If moved from other pages to 'wallets-page', open the default one.
       this.openDefaultWallet()
+    },
+
+    created () {
+      Promise.all([
+        this.$store.dispatch('getAccountTransactions'),
+        this.$store.dispatch('getAccountAssets')
+      ]).finally(() => { this.isReady = true })
     },
 
     methods: {
@@ -66,6 +79,9 @@
 
   .sidemenu {
     $sidemenu-width: 150px;
+
+    height: 100vh;
+    overflow: auto;
 
     &__item {
       display: block;

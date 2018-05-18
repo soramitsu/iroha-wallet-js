@@ -3,8 +3,8 @@
     <el-table
       class="transaction-table"
       :data="transactions"
+      v-loading="loading"
     >
-      <el-table-column prop="id" label="id" width="40" />
       <el-table-column prop="from" label="from" />
       <el-table-column prop="to" label="to" />
       <el-table-column prop="amount" label="amount" />
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-  import moment from 'moment'
+  import { filters as dateFilters } from 'util/date-format'
 
   export default {
     name: 'transactions',
@@ -29,13 +29,12 @@
       currency: {
         type: Boolean,
         default: false
-      }
+      },
+      loading: Boolean
     },
 
     filters: {
-      formatDate (value) {
-        return moment(value).format('DD.MM.YYYY')
-      }
+      ...dateFilters
     }
   }
 </script>
