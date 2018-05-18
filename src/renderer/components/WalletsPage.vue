@@ -80,6 +80,9 @@
   .sidemenu {
     $sidemenu-width: 150px;
 
+    height: 100vh;
+    overflow: auto;
+
     &__item {
       display: block;
       width: $sidemenu-width;
