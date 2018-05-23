@@ -540,7 +540,7 @@ function makeProtoTxWithKeys (builtTx, keys) {
 /*
  *  ===== export ===
  */
-module.exports = {
+export default {
   getStoredNodeIp,
   clearStorage,
   login,

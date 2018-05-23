@@ -1,4 +1,4 @@
-import irohaUtil from '../../../src/util/iroha-util'
+import irohaUtil from '../../src/util/iroha-util'
 
 describe('iroha-util', function () {
   this.timeout(10000)

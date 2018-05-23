@@ -1,3 +1,0 @@
-test/karma-unit/coverage/**
-test/karma-unit/*.js
-test/e2e/*.js
