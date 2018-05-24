@@ -96,6 +96,9 @@
       "node_modules/**/*",
       "package.json"
     ],
-    "npmRebuild": false
+    "npmRebuild": false,
+    "mac": {
+      "icon": "src/assets/logo.png"
+    }
   }
 }
