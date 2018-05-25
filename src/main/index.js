@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, Menu } from 'electron'
+import { app, BrowserWindow, Menu, dialog } from 'electron'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
 
@@ -39,9 +39,7 @@ function createMainWindow () {
     })
   })
 
-  if (!isDevelopment) {
-    addEditMenu(window)
-  }
+  addEditMenu(window)
 
   return window
 }
@@ -76,6 +74,16 @@ function addEditMenu (window) {
       label: 'Application',
       submenu: [
         { role: 'about' },
+        {
+          label: 'Version',
+          click () {
+            dialog.showMessageBox({
+              type: 'info',
+              title: 'Version',
+              message: `commit hash: ${process.env.COMMIT_HASH} (${process.env.COMMIT_HASH_SHORT})`
+            })
+          }
+        },
         { type: 'separator' },
         { role: 'quit' }
       ]

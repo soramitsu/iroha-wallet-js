@@ -85,6 +85,9 @@
     "renderer": {
       "sourceDirectory": "src",
       "webpackConfig": "dist_electron/webpack.renderer.additions.js"
+    },
+    "main": {
+      "webpackConfig": "webpack.main.additions.js"
     }
   },
   "build": {
