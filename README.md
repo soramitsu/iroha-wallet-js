@@ -15,6 +15,7 @@ yarn rebuild
 yarn serve:electron
 
 # build electron application for production
+# See [electron-builder docs](https://www.electron.build/multi-platform-build) for multi platform build
 yarn build:electron
 
 # run unit & end-to-end tests
