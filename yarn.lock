@@ -546,7 +546,7 @@
   dependencies:
     regenerator-transform "^0.12.3"
 
-"@babel/plugin-transform-runtime@7.0.0-beta.47", "@babel/plugin-transform-runtime@^7.0.0-beta.47":
+"@babel/plugin-transform-runtime@7.0.0-beta.47":
   version "7.0.0-beta.47"
   resolved "https://registry.yarnpkg.com/@babel/plugin-transform-runtime/-/plugin-transform-runtime-7.0.0-beta.47.tgz#1700938fa8710909cbf28f7dd39f9b40688b09fd"
   dependencies:
@@ -592,6 +592,13 @@
     "@babel/helper-plugin-utils" "7.0.0-beta.47"
     "@babel/helper-regex" "7.0.0-beta.47"
     regexpu-core "^4.1.3"
+
+"@babel/polyfill@^7.0.0-beta.48":
+  version "7.0.0-beta.48"
+  resolved "https://registry.yarnpkg.com/@babel/polyfill/-/polyfill-7.0.0-beta.48.tgz#0130a169f69c922e5367ad973e366c5dd591ed4f"
+  dependencies:
+    core-js "^2.5.6"
+    regenerator-runtime "^0.11.1"
 
 "@babel/preset-env@7.0.0-beta.47", "@babel/preset-env@^7.0.0-beta.47":
   version "7.0.0-beta.47"
@@ -3009,7 +3016,7 @@ copy-webpack-plugin@^4.5.1:
     p-limit "^1.0.0"
     serialize-javascript "^1.4.0"
 
-core-js@^2.4.0, core-js@^2.4.1, core-js@^2.5.0, core-js@^2.5.3:
+core-js@^2.4.0, core-js@^2.4.1, core-js@^2.5.0, core-js@^2.5.3, core-js@^2.5.6:
   version "2.5.6"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.6.tgz#0fe6d45bf3cac3ac364a9d72de7576f4eb221b9d"
 
