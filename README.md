@@ -1,6 +1,6 @@
 # iroha-wallet-js
 
-> An example wallet application for Iroha
+> An example wallet application for [Iroha](http://iroha.readthedocs.io/)
 
 #### Build Setup
 
@@ -11,21 +11,19 @@ yarn install
 # rebuild native modules for Electron environment
 yarn rebuild
 
-# serve with hot reload at localhost:9080
-yarn dev
+# serve with hot reload
+yarn serve:electron
 
 # build electron application for production
-yarn build
+yarn build:electron
 
 # run unit & end-to-end tests
 yarn test
 
-
 # lint all JS/Vue component files in `src/`
 yarn lint
-
 ```
 
 ---
 
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[7c4e3e9](https://github.com/SimulatedGREG/electron-vue/tree/7c4e3e90a772bd4c27d2dd4790f61f09bae0fcef) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
+This project was generated with [vue-cli 3](https://github.com/vuejs/vue-cli) and [vue-cli-plugin-electron-builder](https://github.com/nklayman/vue-cli-plugin-electron-builder).
