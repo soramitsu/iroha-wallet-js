@@ -18,8 +18,8 @@ yarn serve:electron
 # See [electron-builder docs](https://www.electron.build/multi-platform-build) for multi platform build
 yarn build:electron
 
-# run unit & end-to-end tests
-yarn test
+# run unit test
+yarn test:unit
 
 # lint all JS/Vue component files in `src/`
 yarn lint
