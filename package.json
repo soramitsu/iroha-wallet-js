@@ -94,7 +94,13 @@
       "package.json"
     ],
     "npmRebuild": false,
+    "linux": {
+      "icon": "src/assets/logo.png"
+    },
     "mac": {
+      "icon": "src/assets/logo.png"
+    },
+    "win": {
       "icon": "src/assets/logo.png"
     }
   }
