@@ -528,7 +528,7 @@ function makeProtoQueryWithKeys (builtQuery, keys) {
 }
 
 function makeProtoTxWithKeys (builtTx, keys) {
-  const pbTransaction = require('iroha-lib/pb/queries_pb.js').Transaction
+  const pbTransaction = require('iroha-lib/pb/block_pb.js').Transaction
 
   const blob = protoTxHelper.signAndAddSignature(builtTx, keys).blob()
   const arr = blob2array(blob)
