@@ -9,19 +9,16 @@ const queryBuilder = new iroha.ModelQueryBuilder()
 const protoQueryHelper = new iroha.ModelProtoQuery()
 const crypto = new iroha.ModelCrypto()
 
-const accountId = 'alice@test'
+const accountId = 'admin@test'
 const assetId = 'coolcoin#test'
-const nodeIp = '51.15.244.195:50051'
+const nodeIp = process.env.NODE_IP || '51.15.244.195:50053'
 
-/*
- * setup Alice's keys
- */
-const alicePrivKeyHex = fs.readFileSync(path.join(__dirname, 'alice@test.priv')).toString().trim()
-const alicePubKey = crypto.fromPrivateKey(alicePrivKeyHex).publicKey()
+const adminPrivKeyHex = fs.readFileSync(path.join(__dirname, 'admin@test.priv')).toString().trim()
+const adminPubKey = crypto.fromPrivateKey(adminPrivKeyHex).publicKey()
 
-const keys = crypto.convertFromExisting(
-  alicePubKey.hex(),
-  alicePrivKeyHex
+const adminKeys = crypto.convertFromExisting(
+  adminPubKey.hex(),
+  adminPrivKeyHex
 )
 
 /*
@@ -35,6 +32,34 @@ Promise.resolve()
   })
   .then(
     /*
+    * getAccount
+    */
+    function getAccount () {
+      return new Promise((resolve, reject) => {
+        const queryClient = new endpointGrpc.QueryServiceClient(
+          nodeIp,
+          grpc.credentials.createInsecure()
+        )
+        const query = queryBuilder
+          .creatorAccountId(accountId)
+          .createdTime(Date.now())
+          .queryCounter(1)
+          .getAccount(accountId)
+          .build()
+        const protoQuery = makeProtoQueryWithKeys(query, adminKeys)
+
+        queryClient.find(protoQuery, (err, response) => {
+          if (err) return reject(err)
+
+          console.log('\ngetAccount:', JSON.stringify(response.toObject(), null, '  '))
+
+          resolve()
+        })
+      })
+    }
+  )
+  .then(
+    /*
     * getAccountAssetTransactions
     */
     function getAccountAssetTransactions () {
@@ -46,10 +71,9 @@ Promise.resolve()
         const query = queryBuilder
           .creatorAccountId(accountId)
           .createdTime(Date.now())
-          .queryCounter(1)
           .getAccountAssetTransactions(accountId, assetId)
           .build()
-        const protoQuery = makeProtoQueryWithKeys(query, keys)
+        const protoQuery = makeProtoQueryWithKeys(query, adminKeys)
 
         queryClient.find(protoQuery, (err, response) => {
           if (err) return reject(err)
@@ -74,10 +98,9 @@ Promise.resolve()
         const query = queryBuilder
           .creatorAccountId(accountId)
           .createdTime(Date.now())
-          .queryCounter(1)
           .getAccountTransactions(accountId)
           .build()
-        const protoQuery = makeProtoQueryWithKeys(query, keys)
+        const protoQuery = makeProtoQueryWithKeys(query, adminKeys)
 
         queryClient.find(protoQuery, (err, response) => {
           if (err) return reject(err)
