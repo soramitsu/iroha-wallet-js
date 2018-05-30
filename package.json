@@ -22,7 +22,7 @@
   "dependencies": {
     "date-fns": "^1.29.0",
     "electron-debug": "^1.5.0",
-    "element-ui": "^2.3.9",
+    "element-ui": "2.4.0",
     "grpc": "^1.11.3",
     "iroha-lib": "^0.1.1",
     "lodash": "^4.17.10",
