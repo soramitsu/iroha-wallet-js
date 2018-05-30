@@ -93,7 +93,6 @@
       "node_modules/**/*",
       "package.json"
     ],
-    "npmRebuild": false,
     "linux": {
       "icon": "src/assets/logo.png"
     },
