@@ -24,7 +24,7 @@
     "electron-debug": "^1.5.0",
     "element-ui": "^2.3.9",
     "grpc": "^1.11.3",
-    "iroha-lib": "^0.0.6",
+    "iroha-lib": "^0.1.1",
     "lodash": "^4.17.10",
     "source-map-support": "^0.5.4",
     "vue": "^2.5.16",
