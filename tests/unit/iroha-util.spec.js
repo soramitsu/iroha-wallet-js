@@ -5,7 +5,7 @@ describe('iroha-util', function () {
 
   const ADMIN_ACCOUNT_ID = 'admin@test'
   const ADMIN_PRIVATE_KEY = '1d7e0a32ee0affeb4d22acd73c2c6fb6bd58e266c8c2ce4fa0ffe3dd6a253ffb'
-  const NODE_IP = process.env.NODE_IP || '51.15.244.195:50051'
+  const NODE_IP = process.env.NODE_IP || '51.15.244.195:50053'
   const EXISTING_ASSET = 'coolcoin#test'
   const NONEXISTING_ASSET = 'notexist#test'
 
