@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "date-fns": "^1.29.0",
-    "electron-debug": "^1.5.0",
     "element-ui": "2.4.0",
     "grpc": "^1.11.3",
     "iroha-lib": "^0.1.1",
@@ -35,7 +34,6 @@
     "@babel/polyfill": "^7.0.0-beta.48",
     "@babel/preset-env": "^7.0.0-beta.47",
     "@vue/cli-plugin-babel": "^3.0.0-beta.10",
-    "@vue/cli-plugin-e2e-cypress": "^3.0.0-beta.10",
     "@vue/cli-plugin-eslint": "^3.0.0-beta.10",
     "@vue/cli-plugin-unit-mocha": "^3.0.0-beta.10",
     "@vue/cli-service": "3.0.0-beta.15",
