@@ -14,7 +14,7 @@ const crypto = new iroha.ModelCrypto()
 
 const accountId = 'admin@test'
 const assetId = 'coolcoin#test'
-const nodeIp = process.env.NODE_IP || '51.15.244.195:50053'
+const nodeIp = process.env.NODE_IP || 'localhost:50051'
 
 const adminPrivKeyHex = fs.readFileSync(path.join(__dirname, 'admin@test.priv')).toString().trim()
 const adminPubKey = crypto.fromPrivateKey(adminPrivKeyHex).publicKey()

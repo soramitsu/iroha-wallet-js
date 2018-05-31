@@ -13,7 +13,7 @@ const adminPubKey = crypto.fromPrivateKey(adminPrivKeyHex).publicKey()
 const alicePrivKeyHex = fs.readFileSync(path.join(__dirname, 'alice@test.priv')).toString().trim()
 const alicePubKey = crypto.fromPrivateKey(alicePrivKeyHex).publicKey()
 
-const nodeIp = process.env.NODE_IP || '51.15.244.195:50053'
+const nodeIp = process.env.NODE_IP || 'localhost:50051'
 
 irohaUtil.login('admin@test', adminPrivKeyHex, nodeIp)
   .then(() => tryToCreateAccount('alice', 'test', alicePubKey))
