@@ -1,4 +1,7 @@
 /* eslint-disable no-new */
+/*
+ * test iroha-lib directly (without iroha-util)
+ */
 const fs = require('fs')
 const path = require('path')
 const iroha = require('iroha-lib')
