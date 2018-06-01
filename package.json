@@ -1,7 +1,7 @@
 {
   "name": "iroha-wallet-js",
   "productName": "Iroha Wallet",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Keiji Yahata <yahata@soramitsu.co.jp>",
   "contributors": [
     "Vyacheslav Bikbaev <la.sintez@gmail.com>"
