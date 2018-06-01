@@ -17,7 +17,7 @@
     "test:e2e": "vue-cli-service test:e2e",
     "build:electron": "vue-cli-service build:electron",
     "serve:electron": "vue-cli-service serve:electron",
-    "rebuild": "node-pre-gyp --target=2.0.1 --runtime=electron --fallback-to-build --directory node_modules/grpc reinstall"
+    "rebuild": "node-pre-gyp --target=2.0.1 --runtime=electron --fallback-to-build --directory node_modules/grpc install"
   },
   "dependencies": {
     "date-fns": "^1.29.0",
