@@ -7,7 +7,7 @@
     "Vyacheslav Bikbaev <la.sintez@gmail.com>"
   ],
   "description": "An example wallet application for Iroha",
-  "license": null,
+  "license": "SEE LICENSE IN LICENSE",
   "main": "./dist/electron/main.js",
   "scripts": {
     "serve": "vue-cli-service serve --open",
