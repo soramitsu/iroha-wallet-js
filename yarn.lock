@@ -5395,9 +5395,9 @@ ipaddr.js@1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.6.0.tgz#e3fa357b773da619f26e95f049d055c72796f86b"
 
-iroha-lib@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/iroha-lib/-/iroha-lib-0.1.1.tgz#77000d8fdcf0fbbbf9c5020d1fc3be9987d675cc"
+iroha-lib@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/iroha-lib/-/iroha-lib-0.1.4.tgz#f15522d675becf88b131da03d889c0bee9feead9"
   dependencies:
     google-protobuf "^3.5.0"
     grpc "^1.12.2"
