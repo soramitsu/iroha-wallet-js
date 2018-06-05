@@ -13,14 +13,14 @@ const adminPubKey = crypto.fromPrivateKey(adminPrivKeyHex).publicKey()
 const alicePrivKeyHex = fs.readFileSync(path.join(__dirname, 'alice@test.priv')).toString().trim()
 const alicePubKey = crypto.fromPrivateKey(alicePrivKeyHex).publicKey()
 
-const nodeIp = process.env.NODE_IP || '51.15.244.195:50051'
+const nodeIp = process.env.NODE_IP || 'localhost:50051'
 
 irohaUtil.login('admin@test', adminPrivKeyHex, nodeIp)
   .then(() => tryToCreateAccount('alice', 'test', alicePubKey))
   .then(() => tryToCreateAsset('coolcoin', 'test', 2))
   .then(() => tryToCreateAsset('hotcoin', 'test', 5))
-  .then(() => irohaUtil.addAssetQuantity('admin@test', 'coolcoin#test', '99999999.99'))
-  .then(() => irohaUtil.addAssetQuantity('admin@test', 'hotcoin#test', '99999.99999'))
+  .then(() => irohaUtil.addAssetQuantity('admin@test', 'coolcoin#test', '1000.00'))
+  .then(() => irohaUtil.addAssetQuantity('admin@test', 'hotcoin#test', '1000.00000'))
   .then(() => irohaUtil.transferAsset('admin@test', 'alice@test', 'coolcoin#test', 'hi', '0.50'))
   .then(() => irohaUtil.transferAsset('admin@test', 'alice@test', 'hotcoin#test', 'hi', '0.50000'))
   .catch(err => console.error(err))

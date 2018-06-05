@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-import modules from './modules'
+import modules from './store/index.js'
 
 Vue.use(Vuex)
 

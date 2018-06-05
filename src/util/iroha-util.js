@@ -403,7 +403,6 @@ function createAccount (accountName, domainId, mainPubKey) {
     function buildTx () {
       return txBuilder
         .creatorAccountId(cache.username)
-        .txCounter(1)
         .createdTime(Date.now())
         .createAccount(accountName, domainId, mainPubKey)
         .build()
@@ -424,7 +423,6 @@ function createAsset (assetName, domainId, precision) {
     function buildTx () {
       return txBuilder
         .creatorAccountId(cache.username)
-        .txCounter(1)
         .createdTime(Date.now())
         .createAsset(assetName, domainId, precision)
         .build()
@@ -445,7 +443,6 @@ function addAssetQuantity (accountId, assetId, amount) {
     function buildTx () {
       return txBuilder
         .creatorAccountId(cache.username)
-        .txCounter(1)
         .createdTime(Date.now())
         .addAssetQuantity(accountId, assetId, amount)
         .build()
@@ -468,7 +465,6 @@ function transferAsset (srcAccountId, destAccountId, assetId, description, amoun
     function () {
       return txBuilder
         .creatorAccountId(cache.username)
-        .txCounter(1)
         .createdTime(Date.now())
         .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
         .build()
@@ -528,7 +524,7 @@ function makeProtoQueryWithKeys (builtQuery, keys) {
 }
 
 function makeProtoTxWithKeys (builtTx, keys) {
-  const pbTransaction = require('iroha-lib/pb/queries_pb.js').Transaction
+  const pbTransaction = require('iroha-lib/pb/block_pb.js').Transaction
 
   const blob = protoTxHelper.signAndAddSignature(builtTx, keys).blob()
   const arr = blob2array(blob)

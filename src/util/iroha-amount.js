@@ -7,4 +7,5 @@ export function amountToString ({ value, precision }) {
     .padStart(precision, '0')
     .replace(RegExp(`(\\d{${precision}})$`), '.$1')
     .replace(/^\./, '0.')
+    .replace(/\.$/, '')
 }

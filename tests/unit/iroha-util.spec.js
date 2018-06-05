@@ -1,11 +1,11 @@
-import irohaUtil from '../../../src/util/iroha-util'
+import irohaUtil from '../../src/util/iroha-util'
 
 describe('iroha-util', function () {
   this.timeout(10000)
 
   const ADMIN_ACCOUNT_ID = 'admin@test'
-  const ADMIN_PRIVATE_KEY = '1d7e0a32ee0affeb4d22acd73c2c6fb6bd58e266c8c2ce4fa0ffe3dd6a253ffb'
-  const NODE_IP = process.env.NODE_IP || '51.15.244.195:50051'
+  const ADMIN_PRIVATE_KEY = '0f0ce16d2afbb8eca23c7d8c2724f0c257a800ee2bbd54688cec6b898e3f7e33'
+  const NODE_IP = 'localhost:50051'
   const EXISTING_ASSET = 'coolcoin#test'
   const NONEXISTING_ASSET = 'notexist#test'
 
