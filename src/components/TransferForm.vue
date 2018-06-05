@@ -53,10 +53,10 @@
         // `maxDecimalDigits` specifies the maximum number of digits after decimal point.
         // e.g. if maxDecimalDigits == 5 then '100.12345' is ok
         const amountRegexp = (this.maxDecimalDigits !== 0)
-          ? RegExp(`^([1-9][0-9]*|0)(\\.[0-9]{${this.maxDecimalDigits}})?$`)
+          ? RegExp(`^([1-9][0-9]*|0)(\\.[0-9]{1,${this.maxDecimalDigits}})?$`)
           : RegExp(`^[1-9][0-9]*$`)
         const amountMessage = (this.maxDecimalDigits !== 0)
-          ? `"AMOUNT" should be a number of ${this.maxDecimalDigits} decimal digits.`
+          ? `"AMOUNT" should be a number of max ${this.maxDecimalDigits} decimal digits.`
           : `"AMOUNT" should be an integer.`
 
         return {
