@@ -1,8 +1,20 @@
 # iroha-wallet-js
 
-> An example wallet application for [Iroha](http://iroha.readthedocs.io/)
+An example wallet application for [Iroha](http://iroha.readthedocs.io/).
+This version is compatible with [Iroha 1.0 beta-3](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-3).
 
-#### Build Setup
+## Getting Started
+
+### Prerequisites
+
+* Launch a local Iroha instance.
+  * [2. Getting Started — Iroha 1.0 beta documentation](http://iroha.readthedocs.io/en/latest/getting_started/index.html)
+* Populate the database by our example script.
+```
+node example/setup-accounts-and-assets.js
+```
+
+### Build Setup
 
 ``` bash
 # install dependencies
