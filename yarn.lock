@@ -4904,7 +4904,7 @@ growl@1.10.5:
   version "1.10.5"
   resolved "https://registry.yarnpkg.com/growl/-/growl-1.10.5.tgz#f2735dc2283674fa67478b10181059355c369e5e"
 
-grpc@^1.11.3, grpc@^1.12.2:
+grpc@^1.11.3:
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/grpc/-/grpc-1.12.2.tgz#b9f853540825c6c716c30d06794d7d52d081d968"
   dependencies:
@@ -5395,12 +5395,12 @@ ipaddr.js@1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.6.0.tgz#e3fa357b773da619f26e95f049d055c72796f86b"
 
-iroha-lib@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/iroha-lib/-/iroha-lib-0.1.4.tgz#f15522d675becf88b131da03d889c0bee9feead9"
+iroha-lib@0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/iroha-lib/-/iroha-lib-0.1.7.tgz#c6533acaeed65f39944e696bf4ba4535d6ec077c"
   dependencies:
     google-protobuf "^3.5.0"
-    grpc "^1.12.2"
+    grpc "^1.11.3"
 
 is-absolute-url@^2.0.0:
   version "2.1.0"

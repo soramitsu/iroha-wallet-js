@@ -9,7 +9,6 @@ const grpc = require('grpc')
 
 const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
 const queryBuilder = new iroha.ModelQueryBuilder()
-const protoQueryHelper = new iroha.ModelProtoQuery()
 const crypto = new iroha.ModelCrypto()
 
 const accountId = 'admin@test'
@@ -133,7 +132,7 @@ function blob2array (blob) {
 function makeProtoQueryWithKeys (builtQuery, keys) {
   const pbQuery = require('iroha-lib/pb/queries_pb.js').Query
 
-  const blob = protoQueryHelper.signAndAddSignature(builtQuery, keys).blob()
+  const blob = new iroha.ModelProtoQuery(builtQuery).signAndAddSignature(keys).finish().blob()
   const arr = blob2array(blob)
   const protoQuery = pbQuery.deserializeBinary(arr)
 

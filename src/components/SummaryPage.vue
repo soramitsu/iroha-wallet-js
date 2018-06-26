@@ -60,10 +60,8 @@
     },
 
     created () {
-      Promise.all([
-        this.$store.dispatch('getAccountTransactions'),
-        this.$store.dispatch('getAccountAssets')
-      ]).finally(() => { this.isReady = true })
+      this.$store.dispatch('getAllAccountAssetsTransactions')
+        .finally(() => { this.isReady = true })
     }
   }
 </script>
