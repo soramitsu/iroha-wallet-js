@@ -80,6 +80,7 @@ yarn lint
 * [webpack 4](https://github.com/webpack/webpack)
 * [vue-cli-plugin-electron-builder](https://github.com/nklayman/vue-cli-plugin-electron-builder)
 * [JavaScript Standard Style](https://github.com/standard/standard)
+* [Font Awesome](https://fontawesome.com/)
 
 ## License
 

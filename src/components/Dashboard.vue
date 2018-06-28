@@ -4,19 +4,19 @@
       <div class="sidemenu">
         <div class="sidemenu__top">
           <router-link class="sidemenu__item" to="/dashboard/summary-page">
-            <i class="el-icon-menu sidemenu__icon"></i>
+            <font-awesome-icon icon="tachometer-alt" class="sidemenu__icon" />
             summary
           </router-link>
 
           <router-link class="sidemenu__item" to="/dashboard/wallets-page">
-            <i class="el-icon-menu sidemenu__icon"></i>
+            <font-awesome-icon icon="wallet" class="sidemenu__icon" />
             wallets
           </router-link>
         </div>
 
         <div class="sidemenu__bottom">
           <div class="sidemenu__item" @click="logout">
-            <i class="el-icon-back sidemenu__icon"></i>
+            <font-awesome-icon icon="sign-out-alt" class="sidemenu__icon" />
             logout
           </div>
         </div>
@@ -83,7 +83,8 @@
       }
 
       &__icon {
-        font-size: 60px;
+        font-size: 50px;
+        margin: 5px 0;
       }
     }
   }

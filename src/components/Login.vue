@@ -29,7 +29,7 @@
             :disabled="isLoading"
           >
             <el-button>
-              <i class="el-icon-upload2"></i>
+              <font-awesome-icon icon="upload" />
             </el-button>
           </el-upload>
         </el-row>

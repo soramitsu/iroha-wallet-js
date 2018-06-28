@@ -20,6 +20,9 @@
     "rebuild": "node-pre-gyp --target=2.0.1 --runtime=electron --fallback-to-build --directory node_modules/grpc install"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.0",
+    "@fortawesome/free-solid-svg-icons": "^5.1.0",
+    "@fortawesome/vue-fontawesome": "^0.1.0",
     "date-fns": "^1.29.0",
     "element-ui": "2.4.0",
     "grpc": "^1.11.3",
