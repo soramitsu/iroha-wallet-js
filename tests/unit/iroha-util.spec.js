@@ -47,23 +47,16 @@ describe('iroha-util', function () {
     afterEach(logout)
 
     it('should fail before login', done => {
-      irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID, 'coolcoin#test')
+      irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID)
         .then(() => done(new Error('query should fail')))
         .catch(() => done())
     })
 
     it('should succeed after login', done => {
       irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
-        .then(() => irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID, EXISTING_ASSET))
+        .then(() => irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID))
         .then(() => done())
         .catch(err => done(err))
-    })
-
-    it('should fail to get nonexisting asset', done => {
-      irohaUtil.login(ADMIN_ACCOUNT_ID, ADMIN_PRIVATE_KEY, NODE_IP)
-        .then(() => irohaUtil.getAccountAssets(ADMIN_ACCOUNT_ID, NONEXISTING_ASSET))
-        .then(() => done(new Error('query should fail')))
-        .catch(() => done())
     })
   })
 

@@ -32,8 +32,6 @@ const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
 const pbResponse = require('iroha-lib/pb/responses_pb.js')
 const txBuilder = new iroha.ModelTransactionBuilder()
 const queryBuilder = new iroha.ModelQueryBuilder()
-const protoTxHelper = new iroha.ModelProtoTransaction()
-const protoQueryHelper = new iroha.ModelProtoQuery()
 const crypto = new iroha.ModelCrypto()
 
 /*
@@ -97,6 +95,24 @@ function getStoredNodeIp () {
  */
 function clearStorage () {
   localStorage.removeItem('iroha-wallet:nodeIp')
+}
+
+/**
+ * return true if logged in
+ */
+function isLoggedIn () {
+  return !!cache.username
+}
+
+/**
+ * generate new keypair
+ */
+function generateKeypair () {
+  const keypair = crypto.generateKeypair()
+  const publicKey = keypair.publicKey().hex()
+  const privateKey = keypair.privateKey().hex()
+
+  return { publicKey, privateKey }
 }
 
 /*
@@ -251,9 +267,8 @@ function getAccountAssetTransactions (accountId, assetId) {
 /**
  * getAccountAssets https://hyperledger.github.io/iroha-api/#get-account-assets
  * @param {String} accountId
- * @param {String} assetId
  */
-function getAccountAssets (accountId, assetId) {
+function getAccountAssets (accountId) {
   debug('starting getAccountAssets...')
 
   return sendQuery(
@@ -262,7 +277,7 @@ function getAccountAssets (accountId, assetId) {
         .creatorAccountId(cache.username)
         .createdTime(Date.now())
         .queryCounter(1)
-        .getAccountAssets(accountId, assetId)
+        .getAccountAssets(accountId)
         .build()
     },
     (resolve, reject, responseName, response) => {
@@ -270,7 +285,7 @@ function getAccountAssets (accountId, assetId) {
         return reject(new Error(`Query response error: expected=ACCOUNT_ASSETS_RESPONSE, actual=${responseName}`))
       }
 
-      const assets = response.getAccountAssetsResponse().toObject()
+      const assets = response.getAccountAssetsResponse().toObject().accountAssetsList
 
       debug('assets', assets)
 
@@ -307,6 +322,15 @@ function getAssetInfo (assetId) {
       resolve(info)
     }
   )
+}
+
+// TODO: implement it
+function getAllUnsignedTransactions (accountId) {
+  debug('starting getAllUnsignedTransactions...')
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve(['DUMMY']), 500)
+  })
 }
 
 /*
@@ -516,7 +540,7 @@ function getProtoEnumName (obj, key, value) {
 function makeProtoQueryWithKeys (builtQuery, keys) {
   const pbQuery = require('iroha-lib/pb/queries_pb.js').Query
 
-  const blob = protoQueryHelper.signAndAddSignature(builtQuery, keys).blob()
+  const blob = new iroha.ModelProtoQuery(builtQuery).signAndAddSignature(keys).finish().blob()
   const arr = blob2array(blob)
   const protoQuery = pbQuery.deserializeBinary(arr)
 
@@ -526,7 +550,7 @@ function makeProtoQueryWithKeys (builtQuery, keys) {
 function makeProtoTxWithKeys (builtTx, keys) {
   const pbTransaction = require('iroha-lib/pb/block_pb.js').Transaction
 
-  const blob = protoTxHelper.signAndAddSignature(builtTx, keys).blob()
+  const blob = new iroha.ModelProtoTransaction(builtTx).signAndAddSignature(keys).finish().blob()
   const arr = blob2array(blob)
   const protoTx = pbTransaction.deserializeBinary(arr)
 
@@ -541,6 +565,8 @@ module.exports = {
   clearStorage,
   login,
   logout,
+  isLoggedIn,
+  generateKeypair,
 
   // queries
   getAccount,
@@ -548,6 +574,7 @@ module.exports = {
   getAccountAssetTransactions,
   getAccountTransactions,
   getAssetInfo,
+  getAllUnsignedTransactions,
 
   // commands
   createAccount,

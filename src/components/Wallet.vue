@@ -65,19 +65,21 @@
 
     methods: {
       fetchWalletByWalletId (walletId) {
+        this.wallet = this.$store.getters.wallets.find((w) => (w.id === walletId))
+
         return this.$store.dispatch('getAccountAssets')
           .then(() => {
-            this.wallet = this.$store.getters.wallets
-              .find((w) => (w.id === walletId))
             this.maxDecimalDigits = this.wallet.precision
           })
           .then(() => this.$refs['form'].clearValidationMessage())
       },
 
       fetchTransactionsByWalletId (walletId) {
-        return this.$store.dispatch('getAccountTransactions')
+        const assetId = this.wallet.name
+
+        return this.$store.dispatch('getAccountAssetTransactions', { assetId })
           .then(() => {
-            this.transactions = this.$store.getters.getTransfersByWalletId(walletId)
+            this.transactions = this.$store.getters.getTransactionsByAssetId(assetId)
           })
           .finally(() => { this.isReady = true })
       },
