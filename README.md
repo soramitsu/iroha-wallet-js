@@ -1,14 +1,19 @@
 # Iroha Wallet
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-[![Dependency Status](https://david-dm.org/soramitsu/iroha-wallet-js.svg)](https://david-dm.org/soramitsu/iroha-wallet-js)
-[![Iroha 1.0 beta-3](https://img.shields.io/badge/iroha-1.0.0--beta3-e2232d.svg)](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-3)
+[![Iroha 1.0 beta-3](https://img.shields.io/badge/iroha-1.0.0--beta3-e2232d.svg?style=flat-square)](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-3)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 
 Iroha Wallet is an example wallet application for [Iroha](http://iroha.readthedocs.io/).
 This version is compatible with [Iroha 1.0 beta-3](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-3).
 
-![summary](https://user-images.githubusercontent.com/1365915/41962365-cefd72fa-7a2f-11e8-9717-86e416deb2b4.png)
+Iroha Wallet has following features:
+
+1. Login with your Iroha account.
+2. See your assets and transactions.
+3. Transfer your assets to another Iroha account.
+
+![dashboard](https://user-images.githubusercontent.com/1365915/42013908-6de21254-7ada-11e8-99eb-ace8a9cff171.png)
 
 ## Getting Started
 
@@ -69,9 +74,12 @@ yarn lint
 
 ## Technologies
 
-
-
-## Contributing
+* [Iroha v1.0.0-beta3](http://iroha.readthedocs.io/)
+* [Electron 2](https://electronjs.org/)
+* [vue-cli 3](https://github.com/vuejs/vue-cli)
+* [webpack 4](https://github.com/webpack/webpack)
+* [vue-cli-plugin-electron-builder](https://github.com/nklayman/vue-cli-plugin-electron-builder)
+* [JavaScript Standard Style](https://github.com/standard/standard)
 
 ## License
 
