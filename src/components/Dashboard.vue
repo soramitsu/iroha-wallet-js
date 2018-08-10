@@ -30,16 +30,16 @@
 </template>
 
 <script>
-  export default {
-    name: 'dashboard',
+export default {
+  name: 'dashboard',
 
-    methods: {
-      logout () {
-        this.$store.dispatch('logout')
-          .then(() => this.$router.push('/login'))
-      }
+  methods: {
+    logout () {
+      this.$store.dispatch('logout')
+        .then(() => this.$router.push('/login'))
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>

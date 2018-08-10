@@ -3,6 +3,14 @@ const debug = require('debug')('iroha-util')
 const iroha = require('iroha-lib')
 const grpc = require('grpc')
 
+const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
+const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
+const pbResponse = require('iroha-lib/pb/qry_responses_pb')
+
+const txBuilder = new iroha.ModelTransactionBuilder()
+const queryBuilder = new iroha.ModelQueryBuilder()
+const crypto = new iroha.ModelCrypto()
+
 /**
  * default timeout limit of queries
  */
@@ -26,13 +34,6 @@ const localStorage = global.localStorage || {
   getItem () {},
   removeItem () {}
 }
-
-const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
-const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
-const pbResponse = require('iroha-lib/pb/responses_pb.js')
-const txBuilder = new iroha.ModelTransactionBuilder()
-const queryBuilder = new iroha.ModelQueryBuilder()
-const crypto = new iroha.ModelCrypto()
 
 /*
  * ===== functions =====
@@ -456,11 +457,10 @@ function createAsset (assetName, domainId, precision) {
 
 /**
  * addAssetQuantity https://hyperledger.github.io/iroha-api/#add-asset-quantity
- * @param {String} accountId
  * @param {String} assetId
  * @param {String} amount
  */
-function addAssetQuantity (accountId, assetId, amount) {
+function addAssetQuantity (assetId, amount) {
   debug('starting addAssetQuantity...')
 
   return command(
@@ -468,7 +468,7 @@ function addAssetQuantity (accountId, assetId, amount) {
       return txBuilder
         .creatorAccountId(cache.username)
         .createdTime(Date.now())
-        .addAssetQuantity(accountId, assetId, amount)
+        .addAssetQuantity(assetId, amount)
         .build()
     }
   )

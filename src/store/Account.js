@@ -2,7 +2,6 @@ import Vue from 'vue'
 import _ from 'lodash'
 import grpc from 'grpc'
 import irohaUtil from 'util/iroha-util'
-import { amountToString } from 'util/iroha-amount'
 import { getTransferAssetsFrom } from 'util/store-util'
 
 const types = _([
@@ -50,7 +49,7 @@ const getters = {
       return {
         id: a.assetId.replace(/#/g, '$'),
         name: a.assetId,
-        amount: amountToString(a.balance),
+        amount: a.balance,
         precision: a.balance.precision
       }
     })
