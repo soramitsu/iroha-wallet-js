@@ -4,7 +4,7 @@ describe('iroha-util', function () {
   this.timeout(10000)
 
   const ADMIN_ACCOUNT_ID = 'admin@test'
-  const ADMIN_PRIVATE_KEY = '0f0ce16d2afbb8eca23c7d8c2724f0c257a800ee2bbd54688cec6b898e3f7e33'
+  const ADMIN_PRIVATE_KEY = 'f101537e319568c765b2cc89698325604991dca57b9716b58016b253506cab70'
   const NODE_IP = 'localhost:50051'
   const EXISTING_ASSET = 'coolcoin#test'
   const NONEXISTING_ASSET = 'notexist#test'

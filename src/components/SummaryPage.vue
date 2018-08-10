@@ -31,39 +31,39 @@
 </template>
 
 <script>
-  import { mapState, mapGetters } from 'vuex'
-  import Transactions from '@/components/Transactions'
+import { mapState, mapGetters } from 'vuex'
+import Transactions from '@/components/Transactions'
 
-  export default {
-    name: 'summary-page',
+export default {
+  name: 'summary-page',
 
-    components: {
-      Transactions
-    },
+  components: {
+    Transactions
+  },
 
-    data () {
-      return {
-        isReady: false
-      }
-    },
-
-    computed: {
-      ...mapState({
-        accountId: state => state.Account.accountId,
-        accountInfo: state => state.Account.accountInfo
-      }),
-
-      ...mapGetters({
-        transactions: 'transfers',
-        wallets: 'wallets'
-      })
-    },
-
-    created () {
-      this.$store.dispatch('getAllAccountAssetsTransactions')
-        .finally(() => { this.isReady = true })
+  data () {
+    return {
+      isReady: false
     }
+  },
+
+  computed: {
+    ...mapState({
+      accountId: state => state.Account.accountId,
+      accountInfo: state => state.Account.accountInfo
+    }),
+
+    ...mapGetters({
+      transactions: 'transfers',
+      wallets: 'wallets'
+    })
+  },
+
+  created () {
+    this.$store.dispatch('getAllAccountAssetsTransactions')
+      .finally(() => { this.isReady = true })
   }
+}
 </script>
 
 <style lang="scss" scoped>

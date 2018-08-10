@@ -21,51 +21,51 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
-  export default {
-    name: 'wallets-page',
+export default {
+  name: 'wallets-page',
 
-    data () {
-      return {
-        isReady: false
+  data () {
+    return {
+      isReady: false
+    }
+  },
+
+  computed: {
+    ...mapGetters({
+      wallets: 'wallets'
+    })
+  },
+
+  watch: {
+    '$route' (to) {
+      // If moved from 'wallet' to 'wallets-page' (i.e. no wallet opens),
+      // open the default one.
+      if (to.name === 'wallets-page') {
+        this.openDefaultWallet()
       }
-    },
+    }
+  },
 
-    computed: {
-      ...mapGetters({
-        wallets: 'wallets'
-      })
-    },
+  mounted () {
+    // If moved from other pages to 'wallets-page', open the default one.
+    this.openDefaultWallet()
+  },
 
-    watch: {
-      '$route' (to) {
-        // If moved from 'wallet' to 'wallets-page' (i.e. no wallet opens),
-        // open the default one.
-        if (to.name === 'wallets-page') {
-          this.openDefaultWallet()
-        }
-      }
-    },
+  created () {
+    this.$store.dispatch('getAllAccountAssetsTransactions')
+      .finally(() => { this.isReady = true })
+  },
 
-    mounted () {
-      // If moved from other pages to 'wallets-page', open the default one.
-      this.openDefaultWallet()
-    },
-
-    created () {
-      this.$store.dispatch('getAllAccountAssetsTransactions')
-        .finally(() => { this.isReady = true })
-    },
-
-    methods: {
-      openDefaultWallet () {
-        if (this.wallets[0]) {
-          this.$router.push({ name: 'wallet', params: { walletId: this.wallets[0].id } })
-        }
+  methods: {
+    openDefaultWallet () {
+      if (this.wallets[0]) {
+        this.$router.push({ name: 'wallet', params: { walletId: this.wallets[0].id } })
       }
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>
