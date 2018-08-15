@@ -17,7 +17,7 @@ Vue.use(ElementUI, { locale })
 
 library.add(faTachometerAlt, faWallet, faSignOutAlt, faUpload)
 
-Vue.component('font-awesome-icon', FontAwesomeIcon)
+Vue.component('fa-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
 
