@@ -21,7 +21,7 @@
         </el-menu-item>
       </el-menu>
     </div>
-    <el-main class="main" style="width: 100%; height: 100vh; padding: 0; padding-left: 62px;">
+    <el-main class="main" style="width: 100%; height: 100vh; padding: 0 0 0 62px;">
       <router-view />
     </el-main>
   </el-container>
@@ -39,7 +39,6 @@ export default {
 
   computed: {
     currentActiveMenu: function () {
-      console.log(this.$route.path)
       if (this.$route.path.includes('summary')) return '/dashboard/summary-page'
       if (this.$route.path.includes('wallets')) return '/dashboard/wallets-page'
       return this.$route.path
