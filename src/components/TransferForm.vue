@@ -32,68 +32,68 @@
 </template>
 
 <script>
-  export default {
-    name: 'transfer-form',
+export default {
+  name: 'transfer-form',
 
-    model: {
-      prop: 'form',
-      event: 'change'
+  model: {
+    prop: 'form',
+    event: 'change'
+  },
+
+  props: {
+    form: Object,
+    maxDecimalDigits: {
+      validator: v => Number.isInteger(v) && v >= 0
     },
+    loading: Boolean
+  },
 
-    props: {
-      form: Object,
-      maxDecimalDigits: {
-        validator: v => Number.isInteger(v) && v >= 0
-      },
-      loading: Boolean
-    },
+  computed: {
+    rules () {
+      // `maxDecimalDigits` specifies the maximum number of digits after decimal point.
+      // e.g. if maxDecimalDigits == 5 then '100.12345' is ok
+      const amountRegexp = (this.maxDecimalDigits !== 0)
+        ? RegExp(`^([1-9][0-9]*|0)(\\.[0-9]{1,${this.maxDecimalDigits}})?$`)
+        : RegExp(`^[1-9][0-9]*$`)
+      const amountMessage = (this.maxDecimalDigits !== 0)
+        ? `"AMOUNT" should be a number of max ${this.maxDecimalDigits} decimal digits.`
+        : `"AMOUNT" should be an integer.`
 
-    computed: {
-      rules () {
-        // `maxDecimalDigits` specifies the maximum number of digits after decimal point.
-        // e.g. if maxDecimalDigits == 5 then '100.12345' is ok
-        const amountRegexp = (this.maxDecimalDigits !== 0)
-          ? RegExp(`^([1-9][0-9]*|0)(\\.[0-9]{1,${this.maxDecimalDigits}})?$`)
-          : RegExp(`^[1-9][0-9]*$`)
-        const amountMessage = (this.maxDecimalDigits !== 0)
-          ? `"AMOUNT" should be a number of max ${this.maxDecimalDigits} decimal digits.`
-          : `"AMOUNT" should be an integer.`
-
-        return {
-          to: [
-            { required: true, message: 'Please input "TO"', trigger: 'change' },
-            { pattern: /^[a-z_0-9]{1,32}@[a-z_0-9]{1,9}$/, message: '"TO" should match [a-Z_0-9]{1,32}@[a-Z_0-9]{1,9}', trigger: 'change' }
-          ],
-          amount: [
-            { required: true, message: 'Please input "AMOUNT"', trigger: 'change' },
-            { pattern: amountRegexp, message: amountMessage, trigger: 'change' }
-          ]
-        }
-      }
-    },
-
-    watch: {
-      form (to) {
-        this.$emit('change', to)
-      }
-    },
-
-    methods: {
-      onSubmit () {
-        this.$refs['form'].validate(valid => {
-          if (valid) {
-            this.$emit('submit')
-          } else {
-            return false
-          }
-        })
-      },
-
-      clearValidationMessage () {
-        this.$refs['form'].clearValidate()
+      return {
+        to: [
+          { required: true, message: 'Please input "TO"', trigger: 'change' },
+          { pattern: /^[a-z_0-9]{1,32}@[a-z_0-9]{1,9}$/, message: '"TO" should match [a-Z_0-9]{1,32}@[a-Z_0-9]{1,9}', trigger: 'change' }
+        ],
+        amount: [
+          { required: true, message: 'Please input "AMOUNT"', trigger: 'change' },
+          { pattern: amountRegexp, message: amountMessage, trigger: 'change' }
+        ]
       }
     }
+  },
+
+  watch: {
+    form (to) {
+      this.$emit('change', to)
+    }
+  },
+
+  methods: {
+    onSubmit () {
+      this.$refs['form'].validate(valid => {
+        if (valid) {
+          this.$emit('submit')
+        } else {
+          return false
+        }
+      })
+    },
+
+    clearValidationMessage () {
+      this.$refs['form'].clearValidate()
+    }
   }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -2279,6 +2279,10 @@ brorand@^1.0.1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
 
+browser-headers@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/browser-headers/-/browser-headers-0.4.0.tgz#7b6b4d3cc0cecc9ddf503768147932105c421734"
+
 browser-process-hrtime@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/browser-process-hrtime/-/browser-process-hrtime-0.1.2.tgz#425d68a58d3447f02a04aa894187fce8af8b7b8e"
@@ -4924,6 +4928,12 @@ growl@1.10.5:
   version "1.10.5"
   resolved "https://registry.yarnpkg.com/growl/-/growl-1.10.5.tgz#f2735dc2283674fa67478b10181059355c369e5e"
 
+grpc-web-client@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/grpc-web-client/-/grpc-web-client-0.6.2.tgz#3be2187edd6314192321cd9929fc1bfb8b715d91"
+  dependencies:
+    browser-headers "^0.4.0"
+
 grpc@^1.11.3:
   version "1.12.2"
   resolved "https://registry.yarnpkg.com/grpc/-/grpc-1.12.2.tgz#b9f853540825c6c716c30d06794d7d52d081d968"
@@ -5415,12 +5425,13 @@ ipaddr.js@1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.6.0.tgz#e3fa357b773da619f26e95f049d055c72796f86b"
 
-iroha-lib@0.1.7:
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/iroha-lib/-/iroha-lib-0.1.7.tgz#c6533acaeed65f39944e696bf4ba4535d6ec077c"
+iroha-lib@^0.1.9:
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/iroha-lib/-/iroha-lib-0.1.9.tgz#1e26cbf83a4072cfdeac8fe7cb90ac99ce056a40"
   dependencies:
     google-protobuf "^3.5.0"
     grpc "^1.11.3"
+    grpc-web-client "^0.6.2"
 
 is-absolute-url@^2.0.0:
   version "2.1.0"

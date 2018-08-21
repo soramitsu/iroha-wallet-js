@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { amountToString } from './iroha-amount'
 
 export function getTransferAssetsFrom (transactions, accountId, settlements = []) {
   if (_.isEmpty(transactions)) return []
@@ -7,7 +6,7 @@ export function getTransferAssetsFrom (transactions, accountId, settlements = []
   const transformed = []
 
   transactions.forEach(t => {
-    const { commandsList, createdTime } = t.payload
+    const { commandsList, createdTime } = t.payload.reducedPayload
 
     commandsList.forEach(c => {
       if (!c.transferAsset) return
@@ -23,7 +22,7 @@ export function getTransferAssetsFrom (transactions, accountId, settlements = []
       const tx = {
         from: srcAccountId === accountId ? 'you' : srcAccountId,
         to: destAccountId === accountId ? 'you' : destAccountId,
-        amount: amountToString(amount),
+        amount: amount,
         date: createdTime,
         currency: assetId,
         message: description
