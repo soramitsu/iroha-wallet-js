@@ -19,24 +19,24 @@
 </template>
 
 <script>
-  import { filters as dateFilters } from 'util/date-format'
+import { filters as dateFilters } from 'util/date-format'
 
-  export default {
-    name: 'transactions',
+export default {
+  name: 'transactions',
 
-    props: {
-      transactions: Array,
-      currency: {
-        type: Boolean,
-        default: false
-      },
-      loading: Boolean
+  props: {
+    transactions: Array,
+    currency: {
+      type: Boolean,
+      default: false
     },
+    loading: Boolean
+  },
 
-    filters: {
-      ...dateFilters
-    }
+  filters: {
+    ...dateFilters
   }
+}
 </script>
 
 <style lang="scss" scoped>

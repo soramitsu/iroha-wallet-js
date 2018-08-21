@@ -1,11 +1,11 @@
 # Iroha Wallet
 
-[![Iroha 1.0 beta-3](https://img.shields.io/badge/iroha-1.0.0--beta3-e2232d.svg?style=flat-square)](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-3)
+[![Iroha 1.0 beta-4](https://img.shields.io/badge/iroha-1.0.0--beta4-e2232d.svg?style=flat-square)](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-4)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg?style=flat-square)](https://standardjs.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 
 Iroha Wallet is an example wallet application for [Iroha](http://iroha.readthedocs.io/).
-This version is compatible with [Iroha 1.0 beta-3](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-3).
+This version is compatible with [Iroha 1.0 beta-4](https://github.com/hyperledger/iroha/releases/tag/v1.0.0_beta-4).
 
 Iroha Wallet has following features:
 
