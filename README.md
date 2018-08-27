@@ -21,7 +21,8 @@ Iroha Wallet has following features:
 
 First, you need to have an Iroha instance working. You can read how to launch it on [Iroha's docs](http://iroha.readthedocs.io/en/latest/getting_started/index.html). In this guide we assume the local Iroha instance working at `localhost:50051`.
 
-Then, populate the database by our example script. The script will create new account `alice@test` and new assets `coolcoin#test` and `hotcoin#test`. Note that there already exist `admin@test`. Their keys are in `example/`.
+Then, populate the database by our example script as below. The script will create new account `alice@test` and new assets `coolcoin#test` and `hotcoin#test`. Note that there already exist `admin@test`. Their keys are in `example/`.
+Note that you need to complete "Installation" steps in advance if you want to use the example script.
 
 ```
  % node example/setup-accounts-and-assets.js
