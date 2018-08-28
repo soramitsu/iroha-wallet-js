@@ -94,14 +94,14 @@ export default {
       })
         .then(() => {
           this.$message({
-            message: 'Transfer successful!',
+            message: 'Transaction was successfully submitted!',
             type: 'success'
           })
           this.activeTabName = 'history'
         })
         .catch(err => {
           console.error(err)
-          this.$alert(err.message, 'Transfer error', {
+          this.$alert(err.message, 'Transaction error', {
             type: 'error'
           })
         })

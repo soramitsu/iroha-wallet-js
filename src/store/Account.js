@@ -309,8 +309,21 @@ const actions = {
     commit(types.TRANSFER_ASSET_REQUEST)
 
     return irohaUtil.transferAsset(state.accountId, to, assetId, description, amount)
-      .then(() => {
+      .then(txStatusObservable => {
         commit(types.TRANSFER_ASSET_SUCCESS)
+
+        const subscription = txStatusObservable.subscribe(
+          ok => {
+            if (!ok) return
+
+            console.log(`transfer successful`)
+            subscription.unsubscribe()
+          },
+          err => {
+            // TODO: show an error on UI, "transaction was not committed"
+            console.error(err)
+          }
+        )
       })
       .catch(err => {
         commit(types.TRANSFER_ASSET_FAILURE, err)
