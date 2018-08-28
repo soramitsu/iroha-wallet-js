@@ -2,6 +2,8 @@
 const debug = require('debug')('iroha-util')
 const iroha = require('iroha-lib')
 const grpc = require('grpc')
+const { Observable } = require('rxjs')
+const { difference } = require('lodash')
 
 const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
 const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
@@ -340,10 +342,12 @@ function getAllUnsignedTransactions (accountId) {
 /**
  * wrapper function of commands
  * @param {Function} buildQuery
+ * @param {Boolean} waitForCommitted
  * @param {Number} timeoutLimit timeoutLimit
  */
 function command (
   buildTx = function () {},
+  waitForCommitted = true,
   timeoutLimit = DEFAULT_TIMEOUT_LIMIT
 ) {
   let txClient, txHash
@@ -381,37 +385,71 @@ function command (
     })
   })
     .then(() => {
-      debug('sleep 5 seconds...')
-      return sleep(5000)
-    })
-    .then(() => {
       debug('sending transaction status request...')
 
-      return new Promise((resolve, reject) => {
-        const request = new pbEndpoint.TxStatusRequest()
+      const checkStatus = () => {
+        return new Promise((resolve, reject) => {
+          const request = new pbEndpoint.TxStatusRequest()
 
-        request.setTxHash(txHash)
+          request.setTxHash(txHash)
 
-        txClient.status(request, (err, response) => {
-          if (err) {
-            return reject(err)
-          }
+          txClient.status(request, (err, response) => {
+            if (err) {
+              return reject(err)
+            }
 
-          const status = response.getTxStatus()
-          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
-          const statusName = getProtoEnumName(
-            TxStatus,
-            'iroha.protocol.TxStatus',
-            status
-          )
+            const status = response.getTxStatus()
+            const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
+            const statusName = getProtoEnumName(
+              TxStatus,
+              'iroha.protocol.TxStatus',
+              status
+            )
 
-          if (statusName !== 'COMMITTED') {
-            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
-          }
-
-          resolve()
+            resolve(statusName)
+          })
         })
+      }
+
+      const successfulStatuses = [
+        'STATEFUL_VALIDATION_SUCCESS',
+        'STATELESS_VALIDATION_SUCCESS',
+        'NOT_RECEIVED'
+      ]
+      const goalStatuses = waitForCommitted
+        ? ['COMMITTED']
+        : ['COMMITTED', 'STATEFUL_VALIDATION_SUCCESS']
+      const halfwayStatuses = difference(successfulStatuses, goalStatuses)
+
+      const txStatusObservable = new Observable((observer) => {
+        const timer = setInterval(() => {
+          checkStatus()
+            .then(statusName => {
+              console.log('checking status...', statusName, Buffer.from(txHash).toString('hex'))
+
+              const isFinished = !halfwayStatuses.includes(statusName)
+              const isGoal = goalStatuses.includes(statusName)
+              const errorMessage = `Your transaction failed: expected=${goalStatuses.join('|')}, actual=${statusName}`
+
+              if (isFinished && !isGoal) observer.error(new Error(errorMessage))
+              else if (isFinished && isGoal) observer.next(true)
+              else observer.next(false)
+            })
+        }, 1000)
+
+        return () => clearInterval(timer)
       })
+
+      if (waitForCommitted) {
+        return new Promise((resolve, reject) => {
+          const subscription = txStatusObservable.subscribe(
+            ok => ok && subscription.unsubscribe() && resolve(),
+            err => reject(err)
+          )
+        })
+      } else {
+        return txStatusObservable
+      }
     })
 }
 
@@ -492,7 +530,8 @@ function transferAsset (srcAccountId, destAccountId, assetId, description, amoun
         .createdTime(Date.now())
         .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
         .build()
-    }
+    },
+    false
   )
 }
 

@@ -28,6 +28,7 @@
     "grpc": "^1.11.3",
     "iroha-lib": "^0.1.9",
     "lodash": "^4.17.10",
+    "rxjs": "^6.2.2",
     "source-map-support": "^0.5.4",
     "vue": "^2.5.16",
     "vue-router": "^3.0.1",
