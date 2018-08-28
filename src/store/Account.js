@@ -320,6 +320,7 @@ const actions = {
             subscription.unsubscribe()
           },
           err => {
+            // TODO: show an error on UI, "transaction was not committed"
             console.error(err)
           }
         )
