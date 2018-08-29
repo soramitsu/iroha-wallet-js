@@ -166,10 +166,10 @@ const mutations = {
 
   [types.TRANSFER_ASSET_REQUEST] (state) {},
 
-  [types.TRANSFER_ASSET_SUCCESS] (state) {},
+  [types.TRANSFER_ASSET_SUCCESS] (state, { assetId, to, amount }) {},
 
-  [types.TRANSFER_ASSET_FAILURE] (state, err) {
-    handleError(state, err)
+  [types.TRANSFER_ASSET_FAILURE] (state, { assetId, to, amount, error }) {
+    handleError(state, error)
   }
 }
 
@@ -309,8 +309,17 @@ const actions = {
     commit(types.TRANSFER_ASSET_REQUEST)
 
     return irohaUtil.transferAsset(state.accountId, to, assetId, description, amount)
-      .then(() => {
-        commit(types.TRANSFER_ASSET_SUCCESS)
+      .then(statusStream => {
+        statusStream
+          .on('data', finished => {
+            if (!finished) return
+
+            commit(types.TRANSFER_ASSET_SUCCESS, { assetId, to, amount })
+          })
+          .on('error', error => {
+            // TODO: show the error on UI
+            commit(types.TRANSFER_ASSET_FAILURE, { assetId, to, amount, error })
+          })
       })
       .catch(err => {
         commit(types.TRANSFER_ASSET_FAILURE, err)

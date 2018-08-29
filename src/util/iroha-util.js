@@ -2,6 +2,7 @@
 const debug = require('debug')('iroha-util')
 const iroha = require('iroha-lib')
 const grpc = require('grpc')
+const stream = require('stream')
 
 const endpointGrpc = require('iroha-lib/pb/endpoint_grpc_pb.js')
 const pbEndpoint = require('iroha-lib/pb/endpoint_pb.js')
@@ -340,10 +341,12 @@ function getAllUnsignedTransactions (accountId) {
 /**
  * wrapper function of commands
  * @param {Function} buildQuery
+ * @param {Boolean} waitForCommitted
  * @param {Number} timeoutLimit timeoutLimit
  */
 function command (
   buildTx = function () {},
+  waitForCommitted = true,
   timeoutLimit = DEFAULT_TIMEOUT_LIMIT
 ) {
   let txClient, txHash
@@ -381,10 +384,6 @@ function command (
     })
   })
     .then(() => {
-      debug('sleep 5 seconds...')
-      return sleep(5000)
-    })
-    .then(() => {
       debug('sending transaction status request...')
 
       return new Promise((resolve, reject) => {
@@ -392,25 +391,58 @@ function command (
 
         request.setTxHash(txHash)
 
-        txClient.status(request, (err, response) => {
-          if (err) {
-            return reject(err)
+        const originalStatusStream = txClient.statusStream(request)
+        const statusStream = new stream.Transform({
+          readableObjectMode: true,
+          writableObjectMode: true,
+          transform: function (response, encoding, callback) {
+            // get statusName
+            const status = response.getTxStatus()
+            const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
+            const statusName = getProtoEnumName(
+              TxStatus,
+              'iroha.protocol.TxStatus',
+              status
+            )
+
+            debug(`checking tx status...`, statusName, Buffer.from(txHash).toString('hex'))
+
+            const halfwayStatuses = [
+              'STATEFUL_VALIDATION_SUCCESS',
+              'STATELESS_VALIDATION_SUCCESS',
+              'NOT_RECEIVED'
+            ]
+            const finishedStatuses = ['COMMITTED']
+            const isHalfway = halfwayStatuses.includes(statusName)
+            const isFinished = finishedStatuses.includes(statusName)
+
+            if (isHalfway) {
+              callback(null, false)
+            } else if (isFinished) {
+              callback(null, true)
+            } else {
+              const message = `Your transaction failed: expected=COMMITTED, actual=${statusName}`
+              callback(new Error(message))
+            }
           }
-
-          const status = response.getTxStatus()
-          const TxStatus = require('iroha-lib/pb/endpoint_pb.js').TxStatus
-          const statusName = getProtoEnumName(
-            TxStatus,
-            'iroha.protocol.TxStatus',
-            status
-          )
-
-          if (statusName !== 'COMMITTED') {
-            return reject(new Error(`Your transaction wasn't commited: expected=COMMITED, actual=${statusName}`))
-          }
-
-          resolve()
         })
+
+        originalStatusStream.pipe(statusStream)
+
+        if (waitForCommitted) {
+          statusStream
+            .on('data', finished => {
+              if (!finished) return
+
+              statusStream.destroy()
+              resolve()
+            })
+            .on('error', err => {
+              reject(err)
+            })
+        } else {
+          resolve(statusStream)
+        }
       })
     })
 }
@@ -481,6 +513,7 @@ function addAssetQuantity (assetId, amount) {
  * @param {String} assetId
  * @param {String} description
  * @param {String} amount
+ * @returns {Stream} a stream which emits the tx is committed or still being processed
  */
 function transferAsset (srcAccountId, destAccountId, assetId, description, amount) {
   debug('starting transferAsset...')
@@ -492,17 +525,14 @@ function transferAsset (srcAccountId, destAccountId, assetId, description, amoun
         .createdTime(Date.now())
         .transferAsset(srcAccountId, destAccountId, assetId, description, amount)
         .build()
-    }
+    },
+    false
   )
 }
 
 /*
  *  ===== utilities ===
  */
-function sleep (ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 function blob2array (blob) {
   const bytearray = new Uint8Array(blob.size())
   for (let i = 0; i < blob.size(); ++i) {

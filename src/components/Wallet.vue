@@ -94,8 +94,8 @@ export default {
       })
         .then(() => {
           this.$message({
-            message: 'Transfer successful!',
-            type: 'success'
+            message: 'Transaction was submitted.',
+            type: 'info'
           })
           this.activeTabName = 'history'
         })
