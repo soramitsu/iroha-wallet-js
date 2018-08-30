@@ -513,7 +513,6 @@ function addAssetQuantity (assetId, amount) {
  * @param {String} assetId
  * @param {String} description
  * @param {String} amount
- * @returns {Stream} a stream which emits the tx is committed or still being processed
  */
 function transferAsset (srcAccountId, destAccountId, assetId, description, amount) {
   debug('starting transferAsset...')

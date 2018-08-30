@@ -30,7 +30,8 @@ function initialState () {
     rawUnsignedTransactions: [],
     rawTransactions: [],
     assets: [],
-    connectionError: null
+    connectionError: null,
+    transferError: null
   }
 }
 
@@ -166,10 +167,14 @@ const mutations = {
 
   [types.TRANSFER_ASSET_REQUEST] (state) {},
 
-  [types.TRANSFER_ASSET_SUCCESS] (state, { assetId, to, amount }) {},
+  [types.TRANSFER_ASSET_SUCCESS] (state) {},
 
   [types.TRANSFER_ASSET_FAILURE] (state, { assetId, to, amount, error }) {
     handleError(state, error)
+
+    if (!state.connectionError) {
+      state.transferError = { assetId, to, amount, error }
+    }
   }
 }
 
@@ -314,10 +319,9 @@ const actions = {
           .on('data', finished => {
             if (!finished) return
 
-            commit(types.TRANSFER_ASSET_SUCCESS, { assetId, to, amount })
+            commit(types.TRANSFER_ASSET_SUCCESS)
           })
           .on('error', error => {
-            // TODO: show the error on UI
             commit(types.TRANSFER_ASSET_FAILURE, { assetId, to, amount, error })
           })
       })
