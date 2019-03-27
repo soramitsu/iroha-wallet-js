@@ -1,7 +1,7 @@
 {
   "name": "iroha-wallet-js",
   "productName": "Iroha Wallet",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Keiji Yahata <yahata@soramitsu.co.jp>",
   "contributors": [
     "Vyacheslav Bikbaev <la.sintez@gmail.com>",
@@ -9,24 +9,21 @@
   ],
   "description": "An example wallet application for Iroha",
   "license": "SEE LICENSE IN LICENSE",
-  "main": "./dist/electron/main.js",
   "scripts": {
     "serve": "vue-cli-service serve --open",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:e2e",
-    "build:electron": "vue-cli-service build:electron",
-    "serve:electron": "vue-cli-service serve:electron",
-    "rebuild": "node-pre-gyp --target=2.0.1 --runtime=electron --fallback-to-build --directory node_modules/grpc install"
+    "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.15",
     "@fortawesome/free-solid-svg-icons": "^5.7.2",
     "@fortawesome/vue-fontawesome": "^0.1.6",
+    "babel-plugin-component": "^1.1.1",
     "date-fns": "^1.30.1",
     "element-ui": "2.6.1",
-    "iroha-helpers": "0.6.2",
+    "iroha-helpers": "0.6.4",
     "lodash": "^4.17.11",
     "source-map-support": "^0.5.11",
     "vue": "^2.6.9",
@@ -34,8 +31,11 @@
     "vuex": "^3.1.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "@babel/polyfill": "^7.2.5",
     "@babel/preset-env": "^7.3.4",
+    "@babel/register": "^7.0.0",
     "@vue/cli-plugin-babel": "3.5.1",
     "@vue/cli-plugin-eslint": "3.5.1",
     "@vue/cli-plugin-unit-mocha": "3.5.1",
@@ -43,65 +43,28 @@
     "@vue/eslint-config-standard": "4.0.0",
     "@vue/test-utils": "1.0.0-beta.29",
     "chai": "^4.2.0",
-    "electron": "^4.1.0",
-    "electron-builder": "^20.39.0",
-    "electron-webpack": "^2.6.2",
+    "grpc": "^1.19.0",
+    "lint-staged": "^7.2.2",
     "node-sass": "^4.11.0",
     "sass-loader": "^7.1.0",
-    "vue-cli-plugin-electron-builder": "^1.1.3",
     "vue-template-compiler": "^2.6.9"
   },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": 8
-          },
-          "useBuiltIns": "entry"
-        }
-      ]
-    ]
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ],
+  "gitHooks": {
+    "pre-commit": "lint-staged"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "plugin:vue/essential",
-      "@vue/standard"
-    ]
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "electronWebpack": {
-    "renderer": {
-      "sourceDirectory": "src",
-      "webpackConfig": "dist_electron/webpack.renderer.additions.js"
-    },
-    "main": {
-      "webpackConfig": "webpack.main.additions.js"
-    }
-  },
-  "build": {
-    "directories": {
-      "output": "dist_electron"
-    },
-    "files": [
-      "dist/**/*",
-      "node_modules/**/*",
-      "package.json"
+  "lint-staged": {
+    "*.js": [
+      "vue-cli-service lint",
+      "git add"
     ],
-    "linux": {
-      "icon": "src/assets/logo.png"
-    },
-    "mac": {
-      "icon": "src/assets/logo.png"
-    },
-    "win": {
-      "icon": "src/assets/logo.png"
-    }
+    "*.vue": [
+      "vue-cli-service lint",
+      "git add"
+    ]
   }
 }

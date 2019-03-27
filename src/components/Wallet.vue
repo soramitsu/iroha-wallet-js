@@ -111,23 +111,5 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-  @import "~@/styles/element-variables.scss";
-
-  .wallet {
-    padding: 1rem 2rem;
-
-    &__tabs {
-      margin: 1rem 0;
-
-      /deep/ .el-tabs__header {
-        text-align: center;
-      }
-
-      /deep/ .el-tabs__nav {
-        float: none;
-        display: inline-block;
-      }
-    }
-  }
+<style scoped>
 </style>

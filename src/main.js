@@ -11,7 +11,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import ElementUI from 'element-ui'
 import locale from 'element-ui/lib/locale/lang/en'
-import './styles/element-variables.scss'
 
 Vue.use(ElementUI, { locale })
 

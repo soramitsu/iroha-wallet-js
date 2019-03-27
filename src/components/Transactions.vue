@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { filters as dateFilters } from 'util/date-format'
+import { filters as dateFilters } from '@util/date-format'
 
 export default {
   name: 'transactions',
@@ -39,6 +39,5 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-  @import "~@/styles/element-variables.scss";
+<style scoped>
 </style>
