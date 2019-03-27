@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 import Transactions from '@/components/Transactions'
 
 export default {
@@ -59,47 +59,18 @@ export default {
     })
   },
 
+  methods: {
+    ...mapActions([
+      'getAllAccountAssetsTransactions'
+    ])
+  },
+
   created () {
-    this.$store.dispatch('getAllAccountAssetsTransactions')
+    this.getAllAccountAssetsTransactions()
       .finally(() => { this.isReady = true })
   }
 }
 </script>
 
-<style lang="scss" scoped>
-  .summary-page {
-    margin: 20px 35px;
-
-    &__row {
-      margin: 0 0 20px;
-    }
-  }
-
-  .user-card {
-    height: 100%;
-
-    &__account-id {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
-  }
-
-  .wallet-card {
-    height: 100%;
-  }
-
-  .transaction-table {
-    &::before {
-      content: none; // removes an el-table's border
-    }
-
-    /deep/ th {
-      color: black;
-      background: #c4c4c4;
-    }
-
-    /deep/ td {
-      border: none;
-    }
-  }
+<style scoped>
 </style>
