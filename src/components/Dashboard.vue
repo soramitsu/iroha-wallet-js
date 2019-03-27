@@ -15,7 +15,7 @@
           <fa-icon icon="wallet" class="menu-icon" />
           <span slot="title">Wallets</span>
         </el-menu-item>
-        <el-menu-item index="/logout" @click="logout">
+        <el-menu-item index="/logout" @click="onLogout">
           <fa-icon icon="sign-out-alt" class="menu-icon" />
           <span slot="title">Logout</span>
         </el-menu-item>
@@ -28,6 +28,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+
 export default {
   name: 'dashboard',
 
@@ -35,6 +37,10 @@ export default {
     return {
       isCollapsed: true
     }
+  },
+
+  created () {
+    this.getAccountQuorum()
   },
 
   computed: {
@@ -46,63 +52,17 @@ export default {
   },
 
   methods: {
-    logout () {
-      this.$store.dispatch('logout')
+    ...mapActions([
+      'logout',
+      'getAccountQuorum'
+    ]),
+    onLogout () {
+      this.logout()
         .then(() => this.$router.push('/login'))
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-  @import "~@/styles/element-variables.scss";
-
-  .el-side-menu {
-    height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    transition: width .3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    border-right: none;
-    z-index: 100;
-    width: 62px;
-    background-color: $--color-primary;
-
-    /* Getting rid of element.ui styles */
-    position: fixed !important;
-    border-right: none !important;
-
-    &:not(.el-menu--collapse) {
-      width: 160px;
-    }
-  }
-
-  .el-side-menu > .el-menu-item {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: white;
-
-    &:hover {
-      background: darken($--color-primary, 5%);
-    }
-
-    &.is-active{
-      background: white !important;
-      color: black;
-    }
-  }
-
-  .logo {
-    color: white;
-    display: block;
-    text-align: center;
-    margin: 20px 0;
-  }
-
-  .menu-icon {
-    margin-left: 2px;
-    margin-right: 8px;
-    width: 24px;
-    text-align: center;
-    font-size: 40px;
-    vertical-align: middle;
-  }
+<style scoped>
 </style>

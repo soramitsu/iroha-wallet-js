@@ -1,0 +1,28 @@
+{
+  "wallets": [
+    {
+      "name": "AAAAA",
+      "asset": "AAA",
+      "amount": "224.38",
+      "precision": 18
+    },
+    {
+      "name": "DDDDD",
+      "asset": "DDD",
+      "amount": "2423.74",
+      "precision": 18
+    },
+    {
+      "name": "CCCCC",
+      "asset": "CCC",
+      "amount": "11.958",
+      "precision": 18
+    },
+    {
+      "name": "BBBBB",
+      "asset": "BBB",
+      "amount": "176.49",
+      "precision": 18
+    }
+  ]
+}

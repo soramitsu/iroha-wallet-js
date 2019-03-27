@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import _ from 'lodash'
-import grpc from 'grpc'
-import irohaUtil from 'util/iroha-util'
-import { getTransferAssetsFrom } from 'util/store-util'
+import irohaUtil from '@util/iroha'
+import { getTransferAssetsFrom } from '@util/store-util'
 
 const types = _([
   'SIGNUP',
@@ -13,7 +12,8 @@ const types = _([
   'GET_ALL_ACCOUNT_ASSETS_TRANSACTIONS',
   'GET_ACCOUNT_ASSETS',
   'GET_ALL_UNSIGNED_TRANSACTIONS',
-  'TRANSFER_ASSET'
+  'TRANSFER_ASSET',
+  'GET_ACCOUNT_QUORUM'
 ]).chain()
   .flatMap(x => [x + '_REQUEST', x + '_SUCCESS', x + '_FAILURE'])
   .concat(['RESET'])
@@ -30,7 +30,8 @@ function initialState () {
     rawUnsignedTransactions: [],
     rawTransactions: [],
     assets: [],
-    connectionError: null
+    connectionError: null,
+    accountQuorum: 0
   }
 }
 
@@ -38,10 +39,13 @@ const state = initialState()
 
 const getters = {
   transfers (state) {
-    return getTransferAssetsFrom(
-      _(state.rawAssetTransactions).chain().values().flatten().value(),
-      state.accountId
-    )
+    const txs = Object.values(state.rawAssetTransactions)
+      .map(a => a.transactionsList)
+    return getTransferAssetsFrom(_.flatten(txs), state.accountId)
+    // return getTransferAssetsFrom(
+    //   _(state.rawAssetTransactions).chain().values().flatten().value(),
+    //   state.accountId
+    // )
   },
 
   wallets (state) {
@@ -56,10 +60,10 @@ const getters = {
   },
 
   getTransactionsByAssetId: (state) => (assetId) => {
-    return getTransferAssetsFrom(
-      state.rawAssetTransactions[assetId],
+    return state.rawAssetTransactions[assetId] ? getTransferAssetsFrom(
+      state.rawAssetTransactions[assetId].transactionsList,
       state.accountId
-    )
+    ) : []
   }
 }
 
@@ -69,15 +73,8 @@ const getters = {
  * @param {Error} err
  */
 function handleError (state, err) {
-  switch (err.code) {
-    case grpc.status.UNAVAILABLE:
-    case grpc.status.CANCELLED:
-      state.connectionError = err
-      break
-
-    default:
-      state.connectionError = null
-  }
+  console.error(err)
+  throw err
 }
 
 const mutations = {
@@ -170,6 +167,16 @@ const mutations = {
 
   [types.TRANSFER_ASSET_FAILURE] (state, err) {
     handleError(state, err)
+  },
+
+  [types.GET_ACCOUNT_QUORUM_REQUEST] (state) {},
+
+  [types.GET_ACCOUNT_QUORUM_SUCCESS] (state, { quorum }) {
+    state.accountQuorum = quorum
+  },
+
+  [types.GET_ACCOUNT_QUORUM_FAILURE] (state, err) {
+    handleError(state, err)
   }
 }
 
@@ -225,7 +232,12 @@ const actions = {
   getAccountAssetTransactions ({ commit, state }, { assetId }) {
     commit(types.GET_ACCOUNT_ASSET_TRANSACTIONS_REQUEST)
 
-    return irohaUtil.getAccountAssetTransactions(state.accountId, assetId)
+    return irohaUtil.getAccountAssetTransactions({
+      accountId: state.accountId,
+      assetId,
+      pageSize: 100,
+      firstTxHash: undefined
+    })
       .then(responses => {
         commit(types.GET_ACCOUNT_ASSET_TRANSACTIONS_SUCCESS, {
           assetId: assetId,
@@ -269,7 +281,9 @@ const actions = {
   getAccountAssets ({ commit, state }) {
     commit(types.GET_ACCOUNT_ASSETS_REQUEST)
 
-    return irohaUtil.getAccountAssets(state.accountId)
+    return irohaUtil.getAccountAssets({
+      accountId: state.accountId
+    })
       .then(assets => {
         commit(types.GET_ACCOUNT_ASSETS_SUCCESS, assets)
       })
@@ -282,7 +296,11 @@ const actions = {
   getAccountTransactions ({ commit, state }) {
     commit(types.GET_ACCOUNT_TRANSACTIONS_REQUEST)
 
-    return irohaUtil.getAccountTransactions(state.accountId)
+    return irohaUtil.getAccountTransactions({
+      accountId: state.accountId,
+      pageSize: 100,
+      firstTxHash: undefined
+    })
       .then(transactions => {
         commit(types.GET_ACCOUNT_TRANSACTIONS_SUCCESS, transactions)
       })
@@ -295,7 +313,7 @@ const actions = {
   getAllUnsignedTransactions ({ commit, state }) {
     commit(types.GET_ALL_UNSIGNED_TRANSACTIONS_REQUEST)
 
-    return irohaUtil.getAllUnsignedTransactions(state.accountId)
+    return irohaUtil.getRawPendingTransactions()
       .then(responses => {
         commit(types.GET_ALL_UNSIGNED_TRANSACTIONS_SUCCESS, responses)
       })
@@ -305,15 +323,33 @@ const actions = {
       })
   },
 
-  transferAsset ({ commit, state }, { assetId, to, description = '', amount }) {
+  transferAsset ({ commit, state }, { privateKeys, assetId, to, description = '', amount }) {
     commit(types.TRANSFER_ASSET_REQUEST)
 
-    return irohaUtil.transferAsset(state.accountId, to, assetId, description, amount)
+    return irohaUtil.transferAsset(privateKeys, state.accountQuorum, {
+      srcAccountId: state.accountId,
+      destAccountId: to,
+      assetId,
+      description,
+      amount
+    })
       .then(() => {
         commit(types.TRANSFER_ASSET_SUCCESS)
       })
       .catch(err => {
         commit(types.TRANSFER_ASSET_FAILURE, err)
+        throw err
+      })
+  },
+
+  getAccountQuorum ({ commit, state }) {
+    commit(types.GET_ACCOUNT_QUORUM_REQUEST)
+    return irohaUtil.getAccount({
+      accountId: state.accountId
+    })
+      .then((account) => commit(types.GET_ACCOUNT_QUORUM_SUCCESS, account))
+      .catch(err => {
+        commit(types.GET_ACCOUNT_QUORUM_FAILURE, err)
         throw err
       })
   }
