@@ -1,0 +1,52 @@
+version: '3.5'
+
+networks:
+  wallet-js:
+    name: wallet-js-${SUBNET}
+    attachable: true
+
+services:
+  wallet-js-iroha:
+    image: hyperledger/iroha:1.0.0_rc4-hotfix1
+    container_name: wallet-js-iroha-${SUBNET}
+    depends_on:
+      - wallet-js-iroha-postgres
+    tty: true
+    environment:
+      - KEY=keys/node0
+    entrypoint:
+      - /opt/iroha_data/entrypoint.sh
+    networks:
+      - wallet-js
+    volumes:
+      - ./iroha:/opt/iroha_data
+    ports:
+      - 50051:50051
+
+  wallet-js-iroha-postgres:
+    image: postgres:9.5
+    container_name: wallet-js-iroha-postgres-${SUBNET}
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+    networks:
+      - wallet-js
+    logging:
+      driver: none
+
+  grpcwebproxy:
+    build:
+      context: grpcwebproxy/
+    container_name: wallet-js-grpcwebproxy-${SUBNET}
+    depends_on:
+      - wallet-js-iroha
+    entrypoint:
+      - grpcwebproxy
+      - --backend_addr=wallet-js-iroha:50051
+      - --run_tls_server=false
+      - --allow_all_origins=true
+    networks:
+      - wallet-js
+    logging:
+      driver: none
+    ports:
+      - 8081:8080
