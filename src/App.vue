@@ -30,17 +30,34 @@ export default {
 </script>
 
 <style>
-  html,
-  body {
-    background: #c4c4c4;
-    margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
-  }
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300,400,500,700');
 
-  .app {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-  }
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.el-icon {
+  font-family: element-icons !important;
+}
+
+[class^="el-"]:not(i):not([class*='el-icon']),
+[class*="el-"]:not(i):not([class*='el-icon']) {
+  font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
+.app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.fullwidth {
+  width: 100%;
+}
 </style>

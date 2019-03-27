@@ -5,6 +5,7 @@ Vue.use(Router)
 
 // TODO: Add route guards https://router.vuejs.org/en/advanced/navigation-guards.html
 export default new Router({
+  mode: 'hash',
   routes: [
     {
       path: '/',

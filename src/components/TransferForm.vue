@@ -96,22 +96,5 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-  .transfer-form {
-    margin: 2rem 4rem 0 0;
-
-    /deep/ .el-form-item__label {
-      font-weight: bold;
-    }
-  }
-
-  .send-button-container {
-    text-align: right;
-    margin: 30px 0 10px;
-
-    .send-button {
-      height: 3rem;
-      width: 8rem;
-    }
-  }
+<style scoped>
 </style>
