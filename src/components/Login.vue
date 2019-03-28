@@ -1,4 +1,5 @@
 <template>
+<div class="wrapper">
   <div class="login-form-container">
     <div class="logo">
       <img id="logo" src="~@/assets/logo.svg" alt="Iroha">
@@ -55,6 +56,7 @@
       </el-form-item>
     </el-form>
   </div>
+</div>
 </template>
 
 <script>
@@ -134,8 +136,13 @@ export default {
 </script>
 
 <style scoped>
+.wrapper {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
 .login-form-container {
-  margin-top: -7rem;
+  margin: auto;
 }
 .logo {
   display: flex;
@@ -143,8 +150,10 @@ export default {
 }
 .logo img {
   width: 5rem;
+  height: 5rem;
 }
 .login-form {
   width: 25rem;
+  justify-content: center;
 }
 </style>
