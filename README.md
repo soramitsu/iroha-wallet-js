@@ -14,7 +14,7 @@ Iroha Wallet has following features:
 2. See your assets and transactions.
 3. Transfer your assets to another Iroha account.
 
-![iroha-wallet](https://user-images.githubusercontent.com/1365915/42019575-72e1d60c-7af0-11e8-9a49-8c019548efdc.png)
+![iroha-wallet](https://user-images.githubusercontent.com/16295803/55154529-19085000-5166-11e9-9050-c79af6208ab5.png)
 
 ## Getting Started
 
