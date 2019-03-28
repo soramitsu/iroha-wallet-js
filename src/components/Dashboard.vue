@@ -1,27 +1,29 @@
 <template>
   <el-container>
-    <div @mouseenter.passive="isCollapsed = false" @mouseleave.passive="isCollapsed = true">
-      <el-menu
+    <el-aside width="270px" id="side-menu">
+      <div class="title-info">
+        <div>
+          <p class="title">IROHA WALLET</p>
+        </div>
+      </div>
+      <div class="menu-list">
+        <el-menu
           :router="true"
-          :class="isCollapsed ? 'el-side-menu el-menu--collapse' : 'el-side-menu'"
           :default-active="currentActiveMenu"
-      >
-        <h1 class="logo">IW</h1>
-        <el-menu-item index="/dashboard/summary-page">
-          <fa-icon icon="tachometer-alt" class="menu-icon" />
-          <span slot="title">Dashboard</span>
-        </el-menu-item>
-        <el-menu-item index="/dashboard/wallets-page">
-          <fa-icon icon="wallet" class="menu-icon" />
-          <span slot="title">Wallets</span>
-        </el-menu-item>
-        <el-menu-item index="/logout" @click="onLogout">
-          <fa-icon icon="sign-out-alt" class="menu-icon" />
-          <span slot="title">Logout</span>
-        </el-menu-item>
-      </el-menu>
-    </div>
-    <el-main class="main" style="width: 100%; height: 100vh; padding: 0 0 0 62px;">
+        >
+          <el-menu-item index="/dashboard/summary-page">
+            <span slot="title">Dashboard</span>
+          </el-menu-item>
+          <el-menu-item index="/dashboard/wallets-page">
+            <span slot="title">Wallets</span>
+          </el-menu-item>
+          <el-menu-item index="/logout" @click="onLogout">
+            <span slot="title">Logout</span>
+          </el-menu-item>
+        </el-menu>
+      </div>
+    </el-aside>
+    <el-main id="main">
       <router-view />
     </el-main>
   </el-container>
@@ -65,4 +67,66 @@ export default {
 </script>
 
 <style scoped>
+#side-menu {
+  min-height: 100vh;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: fixed;
+  border-right: 1px solid #eaeaea
+}
+
+#main {
+  padding: 0;
+  margin-left: 270px;
+}
+
+.title-info {
+  display: flex;
+  justify-content: center;
+  font-weight: 600;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.menu-list {
+  flex: 1;
+}
+
+.menu-list >>> .el-menu {
+  border-right: 0px
+}
+
+.menu-list >>> .el-menu-item.is-active{
+  background: #e43e33;
+  color: rgb(255, 255, 255, 1);
+  font-weight: 500;
+}
+
+.menu-item {
+  color: #00111f;
+  display: block;
+  padding: 1rem .5rem 1rem 1.5rem;
+}
+
+.menu-item_text svg {
+  margin-right: 0.5rem;
+  width: 1rem;
+}
+.router-link-active > .menu-item_text {
+  color: rgb(255, 255, 255, 1)
+}
+
+.menu-item.router-link-active {
+  background: #e43e33;
+  color: white;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+a.menu-item:hover span {
+  opacity: 1;
+  color: #000000;
+}
 </style>

@@ -42,10 +42,6 @@ const getters = {
     const txs = Object.values(state.rawAssetTransactions)
       .map(a => a.transactionsList)
     return getTransferAssetsFrom(_.flatten(txs), state.accountId)
-    // return getTransferAssetsFrom(
-    //   _(state.rawAssetTransactions).chain().values().flatten().value(),
-    //   state.accountId
-    // )
   },
 
   wallets (state) {
@@ -325,7 +321,6 @@ const actions = {
 
   transferAsset ({ commit, state }, { privateKeys, assetId, to, description = '', amount }) {
     commit(types.TRANSFER_ASSET_REQUEST)
-
     return irohaUtil.transferAsset(privateKeys, state.accountQuorum, {
       srcAccountId: state.accountId,
       destAccountId: to,

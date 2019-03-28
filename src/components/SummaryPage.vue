@@ -1,29 +1,25 @@
 <template>
   <div class="summary-page">
-    <el-row class="summary-page__row" type="flex" :gutter="15">
-      <el-col :span="12">
-        <el-card class="user-card">
-          <div class="user-card__account-id">{{ accountId }}</div>
-
-          <div v-for="(value, key) in accountInfo" :key="key">
-            {{ key }}: {{ value }}
-          </div>
-        </el-card>
+    <el-row class="summary-page__row" type="flex">
+      <el-col :span="10">
+        <div v-if="accountId" class="user-card__account-id"><b>Account:</b> {{ accountId }}</div>
+        <div v-else class="user-card__account-id"><b>Please auth!</b></div>
+        <div v-for="(value, key) in accountInfo" :key="key">
+          <b>{{ key }}:</b> {{ value }}
+        </div>
       </el-col>
 
-      <el-col :span="12">
-        <el-card class="wallet-card" v-loading="!isReady">
-          <div v-for="wallet in wallets" :key="wallet.name">
-            {{ wallet.name }} {{ wallet.amount }}
-          </div>
-
-          <div v-if="wallets.length === 0">No assets</div>
-        </el-card>
+      <el-col :span="10">
+        <div v-for="wallet in wallets" :key="wallet.name">
+          <b>{{ wallet.name }}</b> {{ wallet.amount }}
+        </div>
+        <div v-if="wallets.length === 0"><b>No assets</b></div>
       </el-col>
     </el-row>
 
     <el-row class="summary-page__row">
-      <el-card>
+      <el-card class="transactions-history">
+        <b>Transactions history</b>
         <transactions currency :transactions="transactions" :loading="!isReady" />
       </el-card>
     </el-row>
@@ -73,4 +69,7 @@ export default {
 </script>
 
 <style scoped>
+.summary-page__row {
+  padding: 2rem;
+}
 </style>

@@ -1,7 +1,5 @@
 <template>
   <div class="wallet">
-    {{ wallet.name }} {{ wallet.amount }}
-
     <el-tabs class="wallet__tabs" v-model="activeTabName">
       <el-tab-pane label="HISTORY" name="history">
         <transactions :transactions="transactions" :loading="!isReady" />
@@ -87,6 +85,7 @@ export default {
     onSubmit () {
       this.isSending = true
       this.$store.dispatch('transferAsset', {
+        privateKeys: [this.form.privateKey],
         assetId: this.wallet.name,
         to: this.form.to,
         amount: this.form.amount,
@@ -98,6 +97,8 @@ export default {
             type: 'success'
           })
           this.activeTabName = 'history'
+          this.fetchTransactionsByWalletId(this.wallet.id)
+          this.fetchWalletByWalletId(this.wallet.id)
         })
         .catch(err => {
           console.error(err)
