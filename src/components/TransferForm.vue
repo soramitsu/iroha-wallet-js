@@ -1,27 +1,53 @@
 <template>
+<div class="wrapper">
   <el-form
     class="transfer-form"
     ref="form"
     :model="form"
     :rules="rules"
     label-width="6rem"
+    label-position="top"
   >
-    <el-form-item label="TO:" prop="to">
+    <el-form-item label="To:" prop="to">
       <el-input name="to" v-model="form.to" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="AMOUNT:" prop="amount">
+    <el-form-item label="Amount:" prop="amount">
       <el-input name="amount" v-model="form.amount" :disabled="loading" />
     </el-form-item>
 
-    <el-form-item label="MESSAGE:" prop="message">
+    <el-form-item label="Message:" prop="message">
       <el-input name="message" v-model="form.message" type="textarea" :disabled="loading" />
     </el-form-item>
 
+      <el-form-item label="Private key:" prop="privateKey">
+        <el-row type="flex" justify="space-between">
+          <el-col :span="20">
+            <el-input
+              name="privateKey"
+              v-model="form.privateKey"
+              :disabled="isLoading"
+            />
+          </el-col>
+          <el-upload
+            class="auth-form_upload"
+            action=""
+            :auto-upload="false"
+            :show-file-list="false"
+            :on-change="onFileChosen"
+            :disabled="isLoading"
+          >
+            <el-button>
+              <fa-icon icon="upload" />
+            </el-button>
+          </el-upload>
+        </el-row>
+      </el-form-item>
+
     <el-form-item class="send-button-container">
       <el-button
-        class="send-button"
-        type="primary"
+        class="send-button fullwidth"
+        type="danger"
         @click="onSubmit"
         :loading="loading"
       >
@@ -29,6 +55,7 @@
       </el-button>
     </el-form-item>
   </el-form>
+</div>
 </template>
 
 <script>
@@ -67,6 +94,10 @@ export default {
         amount: [
           { required: true, message: 'Please input "AMOUNT"', trigger: 'change' },
           { pattern: amountRegexp, message: amountMessage, trigger: 'change' }
+        ],
+        privateKey: [
+          { required: true, message: 'Please input "PRIVATE KEY"', trigger: 'change' },
+          { pattern: /^[A-Fa-f0-9]{64}$/, message: '"PRIVATE KEY" should match [A-Fa-f0-9]{64}', trigger: 'change' }
         ]
       }
     }
@@ -91,10 +122,26 @@ export default {
 
     clearValidationMessage () {
       this.$refs['form'].clearValidate()
+    },
+
+    onFileChosen (file, fileList) {
+      const reader = new FileReader()
+
+      reader.onload = (ev) => {
+        this.form.privateKey = (ev.target.result || '').trim()
+      }
+      reader.readAsText(file.raw)
     }
   }
 }
 </script>
 
 <style scoped>
+.wrapper {
+  display: flex;
+  justify-content: center;
+}
+.transfer-form {
+  width: 25rem;
+}
 </style>
