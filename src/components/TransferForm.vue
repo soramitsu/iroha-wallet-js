@@ -66,6 +66,11 @@ export default {
     prop: 'form',
     event: 'change'
   },
+    data () {
+    return {
+      isLoading: false
+    }
+  },
 
   props: {
     form: Object,
