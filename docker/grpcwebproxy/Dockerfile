@@ -6,17 +6,17 @@
 FROM golang as gobin
 
 # Clone the improbable-eng/grpc-web repo.
-WORKDIR /go/src/github.com/improbable-eng
+WORKDIR /app
 RUN git clone https://github.com/improbable-eng/grpc-web.git
 
-# Use `dep` to ensure the correct versions of vendor dependencies are used.
-# See: https://github.com/improbable-eng/grpc-web/issues/174
-WORKDIR /go/src/github.com/improbable-eng/grpc-web
-RUN go get github.com/golang/dep/cmd/dep
-RUN dep ensure
+WORKDIR /app/grpc-web
+RUN go mod init github.com/improbable-eng/grpc-web
+RUN go mod tidy
+RUN rm -rf vendor/
+RUN rm -f Gopkg.*
 
 # Build a static binary for `grpcwebproxy`.
-WORKDIR /go/src/github.com/improbable-eng/grpc-web/go/grpcwebproxy
+WORKDIR /app/grpc-web/go/grpcwebproxy
 ENV CGO_ENABLED='0' GOOS='linux'
 RUN go install
 
@@ -31,8 +31,8 @@ RUN apk add ca-certificates
 # Build the image from the `scratch` (empty) container by copying the binary
 # and SSL certificates into an approapriate location.
 FROM scratch
-COPY --from=gobin ["/go/bin/grpcwebproxy", "/bin/"]
-COPY --from=gobin ["/go/src/github.com/improbable-eng/grpc-web/misc/localhost.*", "/misc/"]
+COPY --from=gobin ["/app/bin/grpcwebproxy", "/bin/"]
+COPY --from=gobin ["/app/grpc-web/misc/localhost.*", "/misc/"]
 COPY --from=certs ["/etc/ssl/*", "/etc/ssl/"]
 
 # Advertise ports 8080 and 8443.
@@ -57,6 +57,6 @@ ENTRYPOINT ["/bin/grpcwebproxy"]
 # Port 50051 is used because it's the most common port used in the GRPC
 # quickstart examples.
 CMD ["--server_tls_cert_file=/misc/localhost.crt", \
-     "--server_tls_key_file=/misc/localhost.key", \
-     "--backend_addr=dev.localdomain:50051", \
-     "--backend_tls_noverify"]
+    "--server_tls_key_file=/misc/localhost.key", \
+    "--backend_addr=dev.localdomain:50051", \
+    "--backend_tls_noverify"]
